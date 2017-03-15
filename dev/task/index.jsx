@@ -21,16 +21,29 @@ export default class Task1 extends React.Component{
     render(){
         this.Atomate.setData(this.state.data);
         let result = this.Atomate.Do();
-        let style = result === 'Все хорошо' ? "success" : "danger";
+        let style = Array.isArray(result) ? "success" : "danger";
+        if (Array.isArray(result)){
+            result = result.map(v => {
+                return(
+                    <li className = "list-group-item list-group-item-success">
+                        {v}
+                    </li>
+                );
+            });
+        }else{
+            result = (
+                <li className = "list-group-item list-group-item-danger">
+                    {result}
+                </li>
+            );
+        }
         return(
             <Row>
                 <Col xs = {12} sm = {6} smOffset = {3}>
                     <input type = "text" onChange = {this.handlerChangedInput} className = "form-control" />
                     <br />
                     <ul className = "list-group">
-                        <li className = {"list-group-item list-group-item-" + style}>
-                            {result}
-                        </li>
+                        {result}
                     </ul>
                 </Col>
             </Row>

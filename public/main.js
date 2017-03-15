@@ -62,10 +62,6 @@
 
 	var _task2 = _interopRequireDefault(_task);
 
-	var _task3 = __webpack_require__(414);
-
-	var _task4 = _interopRequireDefault(_task3);
-
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -74,47 +70,8 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var Exercise = function (_React$Component) {
-	    _inherits(Exercise, _React$Component);
-
-	    function Exercise() {
-	        _classCallCheck(this, Exercise);
-
-	        return _possibleConstructorReturn(this, (Exercise.__proto__ || Object.getPrototypeOf(Exercise)).apply(this, arguments));
-	    }
-
-	    _createClass(Exercise, [{
-	        key: 'render',
-	        value: function render() {
-	            return _react2.default.createElement(
-	                _reactBootstrap.Row,
-	                null,
-	                _react2.default.createElement(
-	                    _reactBootstrap.Col,
-	                    { xs: 12, sm: 12, className: 'text-center' },
-	                    _react2.default.createElement(
-	                        'h3',
-	                        null,
-	                        '\u0417\u0430\u0434\u0430\u043D\u0438\u0435 ',
-	                        this.props.num
-	                    ),
-	                    _react2.default.createElement(
-	                        'h4',
-	                        null,
-	                        this.props.title
-	                    ),
-	                    _react2.default.createElement('h4', { dangerouslySetInnerHTML: { __html: this.props.description } }),
-	                    this.props.children
-	                )
-	            );
-	        }
-	    }]);
-
-	    return Exercise;
-	}(_react2.default.Component);
-
-	var Page = function (_React$Component2) {
-	    _inherits(Page, _React$Component2);
+	var Page = function (_React$Component) {
+	    _inherits(Page, _React$Component);
 
 	    function Page() {
 	        _classCallCheck(this, Page);
@@ -147,21 +104,32 @@
 	                    )
 	                ),
 	                _react2.default.createElement(
-	                    Exercise,
-	                    {
-	                        num: '1',
-	                        title: '\u041F\u043E\u0441\u0442\u0440\u043E\u0438\u0442\u044C \u043F\u0440\u0438\u043C\u0438\u0442\u0438\u0432\u043D\u044B\u0439 \u041C\u041F - \u0430\u0432\u0442\u043E\u043C\u0430\u0442:',
-	                        description: '<b>7.</b> {1^n 0^m | m>n\u22650}.' },
-	                    _react2.default.createElement(_task2.default, null)
-	                ),
-	                _react2.default.createElement('hr', null),
-	                _react2.default.createElement(
-	                    Exercise,
-	                    {
-	                        num: '2',
-	                        title: '\u041F\u043E\u0441\u0442\u0440\u043E\u0438\u0442\u044C \u043D\u0435\u043F\u0440\u0438\u043C\u0438\u0442\u0438\u0432\u043D\u044B\u0439 \u041C\u041F-\u0430\u0432\u0442\u043E\u043C\u0430\u0442 (\u043F\u043E\u0441\u0442\u0430\u0440\u0430\u0442\u044C\u0441\u044F \u043D\u0430\u0439\u0442\u0438 \u0430\u0432\u0442\u043E\u043C\u0430\u0442 \u0441 \u043E\u0434\u043D\u0438\u043C \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435\u043C), \u043A\u043E\u0442\u043E\u0440\u044B\u0439 \u0431\u0443\u0434\u0435\u0442 \u0432\u044B\u043F\u043E\u043B\u043D\u044F\u0442\u044C \u043F\u0435\u0440\u0435\u0432\u043E\u0434:',
-	                        description: '<b>2.</b> 1<sup>n</sup>0<sup>m</sup>1<sup>n</sup>0<sup>m</sup> <i>\u0432</i> 1<sup>m</sup>0<sup>m+n</sup> , n>0, m>0 (<i>\u0440\u0430\u0437\u0440\u0435\u0448\u0430\u0435\u0442\u0441\u044F \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u043D\u0438\u0435 \u043D\u0435\u0441\u043A\u043E\u043B\u044C\u043A\u0438\u0445 \u0441\u0442\u0435\u043A\u043E\u0432</i>).' },
-	                    _react2.default.createElement(_task4.default, null)
+	                    _reactBootstrap.Row,
+	                    null,
+	                    _react2.default.createElement(
+	                        _reactBootstrap.Col,
+	                        { xs: 12, sm: 12, className: 'text-center' },
+	                        _react2.default.createElement(
+	                            'h4',
+	                            null,
+	                            '\u041D\u0435\u043E\u0431\u0445\u043E\u0434\u0438\u043C\u043E \u043D\u0430\u043F\u0438\u0441\u0430\u0442\u044C \u043F\u0440\u043E\u0433\u0440\u0430\u043C\u043C\u0443, \u0440\u0435\u0430\u043B\u0438\u0437\u0443\u044E\u0449\u0443\u044E \u043F\u043E\u0441\u0442\u0440\u043E\u0435\u043D\u0438\u0435 \u0414\u041A\u0410 \u043F\u043E \u0446\u0435\u043F\u043E\u0447\u043A\u0430\u043C \u0432\u0438\u0434\u0430'
+	                        ),
+	                        _react2.default.createElement(
+	                            'h3',
+	                            null,
+	                            _react2.default.createElement(
+	                                'b',
+	                                null,
+	                                'Z=1+|1*01(11|01)+.'
+	                            )
+	                        ),
+	                        _react2.default.createElement(
+	                            'h4',
+	                            null,
+	                            '\u041F\u0440\u043E\u0433\u0440\u0430\u043C\u043C\u0430 \u0434\u043E\u043B\u0436\u043D\u0430 \u0441\u0442\u0440\u043E\u0438\u0442\u044C \u041D\u041A\u0410 \u043F\u043E \u0432\u0432\u0435\u0434\u0435\u043D\u043D\u043E\u0439 \u0441\u0442\u0440\u043E\u043A\u0435 \u0438 \u043F\u0440\u0435\u043E\u0431\u0440\u0430\u0437\u043E\u0432\u044B\u0432\u0430\u0442\u044C \u0435\u0433\u043E \u0432 \u0414\u041A\u0410.'
+	                        ),
+	                        _react2.default.createElement(_task2.default, null)
+	                    )
 	                )
 	            );
 	        }
@@ -39147,7 +39115,22 @@
 	        value: function render() {
 	            this.Atomate.setData(this.state.data);
 	            var result = this.Atomate.Do();
-	            var style = result === 'Все хорошо' ? "success" : "danger";
+	            var style = Array.isArray(result) ? "success" : "danger";
+	            if (Array.isArray(result)) {
+	                result = result.map(function (v) {
+	                    return _react2.default.createElement(
+	                        'li',
+	                        { className: 'list-group-item list-group-item-success' },
+	                        v
+	                    );
+	                });
+	            } else {
+	                result = _react2.default.createElement(
+	                    'li',
+	                    { className: 'list-group-item list-group-item-danger' },
+	                    result
+	                );
+	            }
 	            return _react2.default.createElement(
 	                _reactBootstrap.Row,
 	                null,
@@ -39159,11 +39142,7 @@
 	                    _react2.default.createElement(
 	                        'ul',
 	                        { className: 'list-group' },
-	                        _react2.default.createElement(
-	                            'li',
-	                            { className: "list-group-item list-group-item-" + style },
-	                            result
-	                        )
+	                        result
 	                    )
 	                )
 	            );
@@ -39202,336 +39181,70 @@
 	            this.data = str;
 	        }
 	    }, {
+	        key: 'findOR',
+	        value: function findOR(str) {
+	            var bracketsCount = 0;
+	            for (var i = 0; i < str.length; i++) {
+	                if (str[i] == '(') bracketsCount++;
+	                if (str[i] == ')') bracketsCount--;
+	                if (bracketsCount == 0 && str[i] == "|") return i;
+	            }
+	            return -1;
+	        }
+	    }, {
+	        key: 'areBracketsBalanced',
+	        value: function areBracketsBalanced() {
+	            var s = this.data;
+	            var count = 0;
+	            for (var i = 0; i < s.length; i++) {
+	                if (s[i] == '(') count++;
+	                if (s[i] == ')') count--;
+	                if (count < 0) return false;
+	            }
+	            return count == 0;
+	        }
+	    }, {
+	        key: 'getAtomata',
+	        value: function getAtomata(str) {
+	            var pos = this.findOR(str);
+	            var children = [];
+	            if (pos != -1) {
+	                var leftAtomata = this.getAtomata(str.substr(0, pos));
+	                var rightAtomata = this.getAtomata(str.substr(pos + 1));
+	                children = [leftAtomata, rightAtomata];
+	            } else {
+	                var count = 0,
+	                    positions = [-1, -1];
+	                for (var i = 0; i < str.length; i++) {
+	                    if (str[i] == '(') {
+	                        count++;
+	                        if (count == 1) positions[0] = i;
+	                    }
+	                    if (str[i] == ')') {
+	                        count--;
+	                        if (count == 0) positions[1] = i;
+	                    }
+	                    if (count == 0 && positions[0] >= 0 && positions[1] >= 0 && str[i] == ")") {
+	                        children.push(this.getAtomata(str.substr(positions[0] + 1, positions[1] - positions[0] - 1)));
+	                    }
+	                }
+	            }
+
+	            return {
+	                "children": children,
+	                "source": str
+	            };
+	        }
+	    }, {
 	        key: 'Do',
 	        value: function Do() {
+	            if (!this.data) return "Пустая строка";
 	            var n = this.data.length;
-	            var currState = 1;
-	            var memory = [];
 	            var error = null;
-	            for (var i = 0; i < n && error === null; i++) {
-	                // идем по всей строке
-	                var symbol = this.data[i];
-	                switch (currState) {
-	                    case 1:
-	                        // состояние 1 - еденицы
-	                        if (memory.length) {
-	                            if (symbol == '1') {
-	                                memory.push('Z');
-	                                currState = 1;
-	                            } else if (symbol == '0') {
-	                                memory.pop();
-	                                currState = 2;
-	                            } else {
-	                                error = "Запрещенный символ";
-	                            }
-	                        } else {
-	                            if (symbol == '1') {
-	                                memory.push('Z');
-	                                currState = 1;
-	                            } else if (symbol == '0') {
-	                                currState = 3;
-	                            } else {
-	                                error = "Запрещенный символ";
-	                            }
-	                        }
-	                        break;
-	                    case 2:
-	                        // состояние 2 - нули (если есть еще еденицы в памяти)
-	                        if (memory.length) {
-	                            if (symbol == '1') {
-	                                error = "Запрещена 1 после 0";
-	                            } else if (symbol == '0') {
-	                                memory.pop();
-	                                currState = 2;
-	                            } else {
-	                                error = "Запрещенный символ";
-	                            }
-	                        } else {
-	                            if (symbol == '1') {
-	                                error = "Запрещена 1 после 0";
-	                            } else if (symbol == '0') {
-	                                currState = 3;
-	                            } else {
-	                                error = "Запрещенный символ";
-	                            }
-	                        }
-	                        break;
-	                    case 3:
-	                        // состояние 3 - нули (если кончились еденицы)
-	                        if (memory.length) {
-	                            if (symbol == '1') {
-	                                error = "Неопознанная ошибка - непустой стек (память)";
-	                            } else if (symbol == '0') {
-	                                error = "Неопознанная ошибка - непустой стек (память)";
-	                            } else {
-	                                error = "Запрещенный символ";
-	                            }
-	                        } else {
-	                            if (symbol == '1') {
-	                                error = "Запрещена 1 после 0";
-	                            } else if (symbol == '0') {
-	                                currState = 3;
-	                            } else {
-	                                error = "Запрещенный символ";
-	                            }
-	                        }
-	                        break;
-	                }
-	            }
-	            if (error === null) {
-	                switch (currState) {
-	                    case 1:
-	                        error = memory.length ? "Не хватает нулей" : "Нет нулей";
-	                        break;
-	                    case 2:
-	                        error = memory.length ? "Колличество 0 меньше колличества 1" : "Колличество 0 равно колличеству 1";
-	                        break;
-	                    case 3:
-	                        if (memory.length) error = "Неопознанная ошибка - непустой стек (память)";
-	                        break;
-	                }
-	            }
+	            if (!this.areBracketsBalanced()) return "Скобки не сбалансированы!";
+	            var atomata = this.getAtomata(this.data);
+	            console.log(atomata);
 	            return error === null ? "Все хорошо" : error;
-	        }
-	    }]);
-
-	    return Atomate;
-	}();
-
-	exports.default = Atomate;
-
-/***/ },
-/* 414 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	var _react = __webpack_require__(1);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _reactBootstrap = __webpack_require__(159);
-
-	var _atomate = __webpack_require__(415);
-
-	var _atomate2 = _interopRequireDefault(_atomate);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-	var Task1 = function (_React$Component) {
-	    _inherits(Task1, _React$Component);
-
-	    function Task1(props) {
-	        _classCallCheck(this, Task1);
-
-	        var _this = _possibleConstructorReturn(this, (Task1.__proto__ || Object.getPrototypeOf(Task1)).call(this, props));
-
-	        _this.state = {
-	            data: ""
-	        };
-	        _this.Atomate = new _atomate2.default("");
-	        _this.handlerChangedInput = _this.handlerChangedInput.bind(_this);
-	        return _this;
-	    }
-
-	    _createClass(Task1, [{
-	        key: 'handlerChangedInput',
-	        value: function handlerChangedInput(e) {
-	            this.setState({
-	                data: e.target.value
-	            });
-	        }
-	    }, {
-	        key: 'render',
-	        value: function render() {
-	            this.Atomate.setData(this.state.data);
-	            var result = this.Atomate.Do();
-	            var style = result.match(/(0|1)+/) !== null ? "success" : "danger";
-	            return _react2.default.createElement(
-	                _reactBootstrap.Row,
-	                null,
-	                _react2.default.createElement(
-	                    _reactBootstrap.Col,
-	                    { xs: 12, sm: 6, smOffset: 3 },
-	                    _react2.default.createElement('input', { type: 'text', onChange: this.handlerChangedInput, className: 'form-control' }),
-	                    _react2.default.createElement('br', null),
-	                    _react2.default.createElement(
-	                        'ul',
-	                        { className: 'list-group' },
-	                        _react2.default.createElement(
-	                            'li',
-	                            { className: "list-group-item list-group-item-" + style },
-	                            result
-	                        )
-	                    )
-	                )
-	            );
-	        }
-	    }]);
-
-	    return Task1;
-	}(_react2.default.Component);
-
-	exports.default = Task1;
-
-/***/ },
-/* 415 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	var Atomate = function () {
-	    function Atomate(str) {
-	        _classCallCheck(this, Atomate);
-
-	        this.setData(str);
-	    }
-
-	    _createClass(Atomate, [{
-	        key: 'setData',
-	        value: function setData(str) {
-	            this.data = str;
-	            this.memory = 'X'; // init
-	        }
-	    }, {
-	        key: 'getLastElement',
-	        value: function getLastElement() {
-	            return this.memory.length ? this.memory[this.memory.length - 1] : null;
-	        }
-	    }, {
-	        key: 'replaceMemory',
-	        value: function replaceMemory(sym) {
-	            if (this.memory.length) {
-	                this.popMemory();
-	                this.memory += sym;
-	            }
-	        }
-	    }, {
-	        key: 'popMemory',
-	        value: function popMemory() {
-	            if (this.memory.length) this.memory = this.memory.slice(0, this.memory.length - 1);
-	        }
-	    }, {
-	        key: 'pushMemory',
-	        value: function pushMemory(sym) {
-	            this.memory += sym;
-	        }
-	    }, {
-	        key: 'Do',
-	        value: function Do() {
-	            var n = this.data.length;
-	            var error = null;
-	            var result = [[], [], [], []];
-	            for (var i = 0; i < n && error === null;) {
-	                // идем по всей строке
-	                var symbol = this.data[i];
-
-	                if (this.getLastElement() === 'X') {
-
-	                    // X
-	                    if (symbol === '0') {
-	                        error = 'Нет едениц';
-	                    } else if (symbol === '1') {
-	                        this.replaceMemory("A");
-	                    } else error = 'Некорректный символ';
-	                } else if (this.getLastElement() === 'A') {
-
-	                    // A
-	                    if (symbol === '0') {
-	                        this.popMemory();
-	                    } else if (symbol === '1') {
-	                        this.replaceMemory("CB");
-	                        i++;
-	                        result[0].push(1);
-	                    } else error = 'Некорректный символ';
-	                } else if (this.getLastElement() === 'B') {
-
-	                    // B
-	                    if (symbol === '0') {
-	                        error = "Не хватает едениц";
-	                    } else if (symbol === '1') {
-	                        this.replaceMemory("CA");
-	                        i++;
-	                        result[2].push(1);
-	                    } else error = 'Некорректный символ';
-	                } else if (this.getLastElement() === 'C') {
-
-	                    // C
-	                    if (symbol === '0') {
-	                        this.popMemory();
-	                        this.replaceMemory("D");
-	                        i++;
-	                        result[1].push(0);
-	                    } else if (symbol === '1') {
-	                        error = "Еденица запрещена после нуля";
-	                    } else error = 'Некорректный символ';
-	                } else if (this.getLastElement() === 'D') {
-
-	                    // D
-	                    if (symbol === '0') {
-	                        this.popMemory();
-	                        result[3].push(0);
-	                        i++;
-	                    } else if (symbol === '1') {
-	                        error = "Еденица запрещена после нуля";
-	                    } else error = 'Некорректный символ';
-	                } else if (this.getLastElement() === null) {
-
-	                    // empty
-	                    if (symbol === '0') {
-	                        this.pushMemory('E');
-	                    } else if (symbol === '1') {
-	                        error = "Еденица запрещена после нуля";
-	                    } else error = 'Некорректный символ';
-	                } else if (this.getLastElement() === 'E') {
-
-	                    // E
-	                    if (symbol === '0') {
-	                        this.replaceMemory('F');
-	                        result[1].push(0);
-	                        i++;
-	                    } else if (symbol === '1') {
-	                        error = "Еденица запрещена после нуля";
-	                    } else error = 'Некорректный символ';
-	                } else if (this.getLastElement() === 'F') {
-
-	                    // F
-	                    if (symbol === '0') {
-	                        this.replaceMemory('E');
-	                        result[3].push(0);
-	                        i++;
-	                    } else if (symbol === '1') {
-	                        error = "Еденица запрещена после нуля";
-	                    } else error = 'Некорректный символ';
-	                }
-	            }
-	            if (error === null) {
-	                if (this.getLastElement() === 'X') error = "Нет едениц и нулей";else if (this.getLastElement() === 'A') error = "Нет нулей";else if (this.getLastElement() === 'B') error = "Не хватает едениц и нет нулей";else if (this.getLastElement() === 'C') error = "Мало нулей";else if (this.getLastElement() === 'D') error = "Мало нулей";else if (this.getLastElement() === null) error = "Колличество нулей и едениц совпадает";else if (this.getLastElement() === 'F') error = "Не хватает нулей";
-	            }
-
-	            var resultStrings = [result[0].join(""), result[1].join(""), result[2].join(""), result[3].join("")];
-
-	            return error === null ? resultStrings.join("") : error;
 	        }
 	    }]);
 
