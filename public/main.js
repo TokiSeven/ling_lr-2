@@ -39164,17 +39164,17 @@
 	                        _react2.default.createElement(
 	                            'td',
 	                            null,
-	                            v['0'].join(",")
+	                            v['0'].join(", ")
 	                        ),
 	                        _react2.default.createElement(
 	                            'td',
 	                            null,
-	                            v['1'].join(",")
+	                            v['1'].join(", ")
 	                        ),
 	                        _react2.default.createElement(
 	                            'td',
 	                            null,
-	                            v['e'].join(",")
+	                            v['e'].join(", ")
 	                        )
 	                    );
 	                });

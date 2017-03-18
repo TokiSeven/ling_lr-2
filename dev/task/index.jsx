@@ -58,9 +58,9 @@ export default class Task1 extends React.Component{
                 return (
                     <tr className = 'text-left'>
                         <td>{v.name}</td>
-                        <td>{v['0'].join(",")}</td>
-                        <td>{v['1'].join(",")}</td>
-                        <td>{v['e'].join(",")}</td>
+                        <td>{v['0'].join(", ")}</td>
+                        <td>{v['1'].join(", ")}</td>
+                        <td>{v['e'].join(", ")}</td>
                     </tr>
                 );
             });
