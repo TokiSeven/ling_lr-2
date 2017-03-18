@@ -105,7 +105,12 @@ export default class Atomate{
                     s_end;
                 this.updateState(name, nexts);
                 return [name];
-            }else if (str[0] != ')' || str[0] != '*' || str[0] != '+'){
+            }else if (str[0] == '*' || str[0] == '+'){
+                let er = "Запрещено использовать * или + без скобок для самих себя";
+                er += "\nТекущая строка: " + str;
+                er += "\nТекущие концы: " + s_end.join(', ');
+                throw er;
+            }else if (str[0] != ')'){
                 let er = "Неподдерживаемый символ: " + str[0];
                 er += "\nТекущая строка: " + str;
                 er += "\nТекущие концы: " + s_end.join(', ');
@@ -135,6 +140,6 @@ export default class Atomate{
             'nexts': []
         });
         console.log(this.states);
-        return error === null ? "Все хорошо" : error;
+        return error === null ? this.states : error;
     }
 }

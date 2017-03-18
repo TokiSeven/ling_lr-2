@@ -39100,6 +39100,7 @@
 	        };
 	        _this.Atomate = new _atomate2.default("");
 	        _this.handlerChangedInput = _this.handlerChangedInput.bind(_this);
+	        _this.convertResult = _this.convertResult.bind(_this);
 	        return _this;
 	    }
 
@@ -39111,24 +39112,114 @@
 	            });
 	        }
 	    }, {
+	        key: 'isStateWithTerminal',
+	        value: function isStateWithTerminal(name, terminal, data) {
+	            var r = false;
+	            data.forEach(function (v) {
+	                if (v.name == name && v.terminal == terminal) {
+	                    r = true;
+	                    return false;
+	                }
+	            });
+	            return r;
+	        }
+	    }, {
+	        key: 'convertResult',
+	        value: function convertResult(data) {
+	            var _this2 = this;
+
+	            var converted = [];
+	            data.forEach(function (v) {
+	                var _d = {
+	                    'name': v.name,
+	                    '0': [],
+	                    '1': [],
+	                    'e': []
+	                };
+	                v.nexts.forEach(function (next) {
+	                    if (_this2.isStateWithTerminal(next, '0', data)) _d['0'].push(next);
+	                    if (_this2.isStateWithTerminal(next, '1', data)) _d['1'].push(next);
+	                    if (_this2.isStateWithTerminal(next, 'e', data)) _d['e'].push(next);
+	                });
+	                converted.push(_d);
+	            });
+	            return converted;
+	        }
+	    }, {
 	        key: 'render',
 	        value: function render() {
 	            this.Atomate.setData(this.state.data);
 	            var result = this.Atomate.Do();
 	            var style = Array.isArray(result) ? "success" : "danger";
 	            if (Array.isArray(result)) {
-	                result = result.map(function (v) {
+	                result = this.convertResult(result).map(function (v) {
 	                    return _react2.default.createElement(
-	                        'li',
-	                        { className: 'list-group-item list-group-item-success' },
-	                        v
+	                        'tr',
+	                        { className: 'text-left' },
+	                        _react2.default.createElement(
+	                            'td',
+	                            null,
+	                            v.name
+	                        ),
+	                        _react2.default.createElement(
+	                            'td',
+	                            null,
+	                            v['0'].join(",")
+	                        ),
+	                        _react2.default.createElement(
+	                            'td',
+	                            null,
+	                            v['1'].join(",")
+	                        ),
+	                        _react2.default.createElement(
+	                            'td',
+	                            null,
+	                            v['e'].join(",")
+	                        )
 	                    );
 	                });
+	                result = _react2.default.createElement(
+	                    'table',
+	                    { className: 'table table-hover table-condensed' },
+	                    _react2.default.createElement(
+	                        'thead',
+	                        null,
+	                        _react2.default.createElement(
+	                            'th',
+	                            null,
+	                            '\u0421\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u044F'
+	                        ),
+	                        _react2.default.createElement(
+	                            'th',
+	                            null,
+	                            '0'
+	                        ),
+	                        _react2.default.createElement(
+	                            'th',
+	                            null,
+	                            '1'
+	                        ),
+	                        _react2.default.createElement(
+	                            'th',
+	                            null,
+	                            'e'
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'tbody',
+	                        null,
+	                        result
+	                    )
+	                );
 	            } else {
 	                result = _react2.default.createElement(
-	                    'li',
-	                    { className: 'list-group-item list-group-item-danger' },
-	                    result
+	                    'ul',
+	                    { className: 'list-group' },
+	                    _react2.default.createElement(
+	                        'li',
+	                        { className: 'list-group-item list-group-item-danger' },
+	                        result
+	                    )
 	                );
 	            }
 	            return _react2.default.createElement(
@@ -39139,11 +39230,7 @@
 	                    { xs: 12, sm: 6, smOffset: 3 },
 	                    _react2.default.createElement('input', { type: 'text', onChange: this.handlerChangedInput, className: 'form-control' }),
 	                    _react2.default.createElement('br', null),
-	                    _react2.default.createElement(
-	                        'ul',
-	                        { className: 'list-group' },
-	                        result
-	                    )
+	                    result
 	                )
 	            );
 	        }
@@ -39287,11 +39374,16 @@
 	                    var nexts = str.length > 1 ? this.getAtomata(str.substr(1), s_end) : s_end;
 	                    this.updateState(name, nexts);
 	                    return [name];
-	                } else if (str[0] != ')' || str[0] != '*' || str[0] != '+') {
-	                    var er = "Неподдерживаемый символ: " + str[0];
+	                } else if (str[0] == '*' || str[0] == '+') {
+	                    var er = "Запрещено использовать * или + без скобок для самих себя";
 	                    er += "\nТекущая строка: " + str;
 	                    er += "\nТекущие концы: " + s_end.join(', ');
 	                    throw er;
+	                } else if (str[0] != ')') {
+	                    var _er = "Неподдерживаемый символ: " + str[0];
+	                    _er += "\nТекущая строка: " + str;
+	                    _er += "\nТекущие концы: " + s_end.join(', ');
+	                    throw _er;
 	                }
 	            }
 	        }
@@ -39316,7 +39408,7 @@
 	                'nexts': []
 	            });
 	            console.log(this.states);
-	            return error === null ? "Все хорошо" : error;
+	            return error === null ? this.states : error;
 	        }
 	    }]);
 
