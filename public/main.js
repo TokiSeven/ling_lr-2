@@ -39173,12 +39173,14 @@
 	        _classCallCheck(this, Atomate);
 
 	        this.data = str;
+	        this.states = [];
 	    }
 
 	    _createClass(Atomate, [{
 	        key: 'setData',
 	        value: function setData(str) {
 	            this.data = str;
+	            this.states = [];
 	        }
 	    }, {
 	        key: 'findOR',
@@ -39204,36 +39206,94 @@
 	            return count == 0;
 	        }
 	    }, {
+	        key: 'getAvailableName',
+	        value: function getAvailableName() {
+	            return 'St_' + this.states.length;
+	        }
+	    }, {
+	        key: 'addState',
+	        value: function addState(terminal, nexts) {
+	            var name = this.getAvailableName();
+	            this.states.push({
+	                'name': name,
+	                'terminal': terminal,
+	                'nexts': nexts
+	            });
+	            return name;
+	        }
+	    }, {
+	        key: 'getStatePos',
+	        value: function getStatePos(name) {
+	            var num = -1;
+	            this.states.forEach(function (v, i) {
+	                if (v.name == name) {
+	                    num = i;
+	                    return false;
+	                }
+	            });
+	            return num;
+	        }
+	    }, {
+	        key: 'updateState',
+	        value: function updateState(name) {
+	            var nexts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+	            var terminal = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+
+	            var num = this.getStatePos(name);
+	            if (num == -1) return false;
+	            if (nexts !== null) this.states[num].nexts = nexts;
+	            if (terminal !== null) this.states[num].terminal = terminal;
+	            return true;
+	        }
+	    }, {
 	        key: 'getAtomata',
 	        value: function getAtomata(str) {
+	            var s_end = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : ['R'];
+
+	            if (!str.length) return s_end;
 	            var pos = this.findOR(str);
-	            var children = [];
+
 	            if (pos != -1) {
-	                var leftAtomata = this.getAtomata(str.substr(0, pos));
-	                var rightAtomata = this.getAtomata(str.substr(pos + 1));
-	                children = [leftAtomata, rightAtomata];
+	                // 'ИЛИ' внутри строки
+	                var left = this.getAtomata(str.substr(0, pos), s_end);
+	                var right = this.getAtomata(str.substr(pos + 1), s_end);
+	                if (left === null) left = s_end;
+	                if (right === null) right = s_end;
+	                var names = [].concat(left).concat(right);
+	                return names;
 	            } else {
-	                var count = 0,
-	                    positions = [-1, -1];
-	                for (var i = 0; i < str.length; i++) {
-	                    if (str[i] == '(') {
-	                        count++;
-	                        if (count == 1) positions[0] = i;
+	                // нет явного ИЛИ (только внутри скобок, но это отдельно обрабатывается)
+	                // обработка символа (если не скобка, иначе обработка скобки рекурсивно)
+
+	                if (str[0] == '(') {
+	                    // поиск закрывающей строки
+	                    var count = 1;
+	                    var positions = -1;
+	                    for (var i = 1; i < str.length && count; i++) {
+	                        if (str[i] == '(') {
+	                            count++;
+	                        } else if (str[i] == ')') {
+	                            count--;
+	                            if (count == 0) positions = i;
+	                        }
 	                    }
-	                    if (str[i] == ')') {
-	                        count--;
-	                        if (count == 0) positions[1] = i;
-	                    }
-	                    if (count == 0 && positions[0] >= 0 && positions[1] >= 0 && str[i] == ")") {
-	                        children.push(this.getAtomata(str.substr(positions[0] + 1, positions[1] - positions[0] - 1)));
-	                    }
+	                    var nextsAfterBrackets = s_end;
+	                    if (positions + 1 < str.length) nextsAfterBrackets = this.getAtomata(str.substr(positions + 1), s_end);
+	                    var _names = this.getAtomata(str.substr(1, positions - 1), nextsAfterBrackets);
+	                    return _names;
+	                } else if (str[0] == '1' || str[0] == '0') {
+	                    // если это не все, что выше, то это обычный символ
+	                    var name = this.addState(str[0], []);
+	                    var nexts = str.length > 1 ? this.getAtomata(str.substr(1), s_end) : s_end;
+	                    this.updateState(name, nexts);
+	                    return [name];
+	                } else if (str[0] != ')' || str[0] != '*' || str[0] != '+') {
+	                    var er = "Неподдерживаемый символ: " + str[0];
+	                    er += "\nТекущая строка: " + str;
+	                    er += "\nТекущие концы: " + s_end.join(', ');
+	                    throw er;
 	                }
 	            }
-
-	            return {
-	                "children": children,
-	                "source": str
-	            };
 	        }
 	    }, {
 	        key: 'Do',
@@ -39242,8 +39302,20 @@
 	            var n = this.data.length;
 	            var error = null;
 	            if (!this.areBracketsBalanced()) return "Скобки не сбалансированы!";
-	            var atomata = this.getAtomata(this.data);
-	            console.log(atomata);
+
+	            this.states.push({
+	                'name': 'S',
+	                'terminal': null,
+	                'nexts': []
+	            });
+	            var inputNames = this.getAtomata(this.data);
+	            this.updateState('S', inputNames);
+	            this.states.push({
+	                'name': 'R',
+	                'terminal': 'e',
+	                'nexts': []
+	            });
+	            console.log(this.states);
 	            return error === null ? "Все хорошо" : error;
 	        }
 	    }]);
