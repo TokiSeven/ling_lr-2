@@ -39152,7 +39152,8 @@
 	            var result = this.Atomate.Do();
 	            var style = Array.isArray(result) ? "success" : "danger";
 	            if (Array.isArray(result)) {
-	                result = this.convertResult(result).map(function (v) {
+	                // result = this.convertResult(result).map(v => {
+	                result = result.map(function (v) {
 	                    return _react2.default.createElement(
 	                        'tr',
 	                        { className: 'text-left' },
@@ -39259,15 +39260,15 @@
 	    function Atomate(str) {
 	        _classCallCheck(this, Atomate);
 
-	        this.data = str;
-	        this.states = [];
+	        this.setData(str);
 	    }
 
 	    _createClass(Atomate, [{
 	        key: 'setData',
 	        value: function setData(str) {
 	            this.data = str;
-	            this.states = [];
+	            this.states = {};
+	            this.stars = [];
 	        }
 	    }, {
 	        key: 'findOR',
@@ -39299,54 +39300,74 @@
 	        }
 	    }, {
 	        key: 'addState',
-	        value: function addState(terminal, nexts) {
+	        value: function addState() {
+	            var terminal_0 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+	            var terminal_1 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+	            var terminal_e = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+
 	            var name = this.getAvailableName();
-	            this.states.push({
+	            this.states[name] = {
 	                'name': name,
-	                'terminal': terminal,
-	                'nexts': nexts
-	            });
+	                '0': terminal_0,
+	                '1': terminal_1,
+	                'e': terminal_e
+	            };
 	            return name;
 	        }
 	    }, {
-	        key: 'getStatePos',
-	        value: function getStatePos(name) {
-	            var num = -1;
-	            this.states.forEach(function (v, i) {
-	                if (v.name == name) {
-	                    num = i;
-	                    return false;
-	                }
-	            });
-	            return num;
-	        }
-	    }, {
-	        key: 'updateState',
-	        value: function updateState(name) {
-	            var nexts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-	            var terminal = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-
-	            var num = this.getStatePos(name);
-	            if (num == -1) return false;
-	            if (nexts !== null) this.states[num].nexts = nexts;
-	            if (terminal !== null) this.states[num].terminal = terminal;
+	        key: 'stateAddNext',
+	        value: function stateAddNext(name, terminal, next) {
+	            if (!this.states[name]) return false;
+	            this.states[name][terminal.toString()].push(next);
 	            return true;
 	        }
+
+	        // bindAllStars(){
+	        //     let states = this.states;
+	        //     this.stars.forEach(star => {
+	        //         // у нас есть объект с полями 'name' (имя состояние, которое является входом для звезды)
+	        //         // и 'ends' - массивом имен, в которые надо провести Е дуги
+	        //         this.states.forEach((state, stateNum) => {
+	        //             // state - состояние из всех возможных
+	        //             // если его выходы (nexts) идут в наше (star.name), то надо бы добавить еще одно следующее состояние
+	        //             // ведущее на выходы нашего
+	        //             let stateNexts = state.nexts;
+	        //             state.nexts.forEach(next => {
+	        //                 if (next == star.name){
+	        //                     stateNexts.concat(star.ends);
+	        //                     return false;
+	        //                 }
+	        //             });
+	        //             states[stateNum].nexts = stateNexts;
+	        //         });
+	        //     });
+	        //     this.states = states;
+	        // }
+
 	    }, {
 	        key: 'getAtomata',
 	        value: function getAtomata(str) {
 	            var s_end = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : ['R'];
+	            var isStar = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
 
 	            if (!str.length) return s_end;
+
+	            // ищем 'ИЛИ'
 	            var pos = this.findOR(str);
 
 	            if (pos != -1) {
 	                // 'ИЛИ' внутри строки
-	                var left = this.getAtomata(str.substr(0, pos), s_end);
-	                var right = this.getAtomata(str.substr(pos + 1), s_end);
+	                // получение входных и выходных состояний левых и правых частей 'ИЛИ'
+	                var left = this.getAtomata(str.substr(0, pos), s_end, isStar);
+	                var right = this.getAtomata(str.substr(pos + 1), s_end, isStar);
+
+	                // начало может быть null, если это пустая строка ('|10', left.begins === null)
+	                // тогда можем сразу задать ей конец s_end (это переданное конечное состояние)
 	                if (left === null) left = s_end;
 	                if (right === null) right = s_end;
-	                var names = [].concat(left).concat(right);
+
+	                var names = left.concat(right);
+
 	                return names;
 	            } else {
 	                // нет явного ИЛИ (только внутри скобок, но это отдельно обрабатывается)
@@ -39364,26 +39385,69 @@
 	                            if (count == 0) positions = i;
 	                        }
 	                    }
+
+	                    // обработка всего
 	                    var nextsAfterBrackets = s_end;
-	                    if (positions + 1 < str.length) nextsAfterBrackets = this.getAtomata(str.substr(positions + 1), s_end);
-	                    var _names = this.getAtomata(str.substr(1, positions - 1), nextsAfterBrackets);
+	                    var _names = [];
+	                    if (positions + 1 < str.length) // если после скобок есть что-то
+	                        nextsAfterBrackets = this.getAtomata(str.substr(positions + 1), s_end);
+	                    if (nextsAfterBrackets === true || nextsAfterBrackets === false) {
+	                        // если после скобок звезда или плюсик
+	                        // то берем то, что после плюсика или звезды
+	                        nextsAfterBrackets = this.getAtomata(str.substr(positions + 2), s_end);
+	                        _names = this.getAtomata(str.substr(1, positions - 1), nextsAfterBrackets, 1);
+	                    } else {
+	                        _names = this.getAtomata(str.substr(1, positions - 1), nextsAfterBrackets);
+	                    }
 	                    return _names;
 	                } else if (str[0] == '1' || str[0] == '0') {
 	                    // если это не все, что выше, то это обычный символ
-	                    var name = this.addState(str[0], []);
-	                    var nexts = str.length > 1 ? this.getAtomata(str.substr(1), s_end) : s_end;
-	                    this.updateState(name, nexts);
+	                    var name = this.addState();
+	                    if (_isStar) {
+	                        // если мы начали с этой строки и у нас флаг
+	                        // isStar в тру, то надо в конечный элемент добавить начальный
+	                        // заодно надо бы добавить в особый массив stars текущие вхождения и выходы
+	                        // чтобы потом спокойно перебиндить все состояния, которые входят в это
+	                        // на Е дугу к концу
+	                        this.stars.push({
+	                            'name': name,
+	                            'ends': s_end
+	                        });
+	                        s_end.push(name);
+	                        _isStar = false;
+	                    }
+	                    var nexts = s_end;
+	                    var _isStar = false;
+	                    var isPlus = false;
+	                    if (str.length >= 2) {
+	                        nexts = this.getAtomata(str.substr(1), s_end);
+	                        if (nexts === true || nexts === false) {
+	                            // если следующий элемент - звезда или плюс
+	                            // заранее узнаем что это, ибо дальше эта переменная меняется
+	                            if (nexts) _isStar = true;else isPlus = true;
+
+	                            // а тут берем рекурсию от следующего элемента
+	                            if (str.length >= 3) nexts = this.getAtomata(str.substr(2), s_end);else nexts = s_end;
+
+	                            // а тут мы добавляем возврат на наш текущий элемент
+	                            // надо же вернуться
+	                            nexts = nexts.concat(name);
+	                        }
+	                        if (_isStar) {
+	                            // this.addInfoToState(name, {'is'});
+	                        }
+	                    }
+
+	                    // после всех действий надо бы обновить следующие элементы в хранилище
+	                    this.stateAddNext(name, str[0], next);
+	                    // this.updateState(name, nexts);
 	                    return [name];
 	                } else if (str[0] == '*' || str[0] == '+') {
-	                    var er = "Запрещено использовать * или + без скобок для самих себя";
-	                    er += "\nТекущая строка: " + str;
-	                    er += "\nТекущие концы: " + s_end.join(', ');
-	                    throw er;
+	                    // ввозвращение из getAtomata true свидетельствует о знаке * (false о знаке +), иначе объект
+	                    return str[0] == '*';
 	                } else if (str[0] != ')') {
-	                    var _er = "Неподдерживаемый символ: " + str[0];
-	                    _er += "\nТекущая строка: " + str;
-	                    _er += "\nТекущие концы: " + s_end.join(', ');
-	                    throw _er;
+	                    var er = "Неподдерживаемый символ: " + str[0];
+	                    throw er;
 	                }
 	            }
 	        }
@@ -39395,19 +39459,28 @@
 	            var error = null;
 	            if (!this.areBracketsBalanced()) return "Скобки не сбалансированы!";
 
+	            this.states['S'] = {
+	                '0': [],
+	                '1': [],
+	                'e': []
+	            };
 	            this.states.push({
 	                'name': 'S',
 	                'terminal': null,
 	                'nexts': []
 	            });
-	            var inputNames = this.getAtomata(this.data);
-	            this.updateState('S', inputNames);
 	            this.states.push({
 	                'name': 'R',
 	                'terminal': 'e',
 	                'nexts': []
 	            });
-	            console.log(this.states);
+	            try {
+	                var inputNames = this.getAtomata(this.data, ['R']);
+	                this.updateState('S', inputNames);
+	                this.bindAllStars();
+	            } catch (e) {
+	                error = e;
+	            }
 	            return error === null ? this.states : error;
 	        }
 	    }]);

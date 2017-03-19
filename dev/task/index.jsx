@@ -54,7 +54,8 @@ export default class Task1 extends React.Component{
         let result = this.Atomate.Do();
         let style = Array.isArray(result) ? "success" : "danger";
         if (Array.isArray(result)){
-            result = this.convertResult(result).map(v => {
+            // result = this.convertResult(result).map(v => {
+            result = result.map(v => {
                 return (
                     <tr className = 'text-left'>
                         <td>{v.name}</td>
