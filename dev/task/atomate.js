@@ -75,12 +75,12 @@ export default class Atomate{
             // 'ИЛИ' внутри строки
             // получение входных и выходных состояний левых и правых частей 'ИЛИ'
             let left = this.getAtomata(str.substr(0, pos), s_end);
-            let right = this.getAtomata(str.substr(pos + 1), s_end);
+            let right = (pos + 1 < str.length) ? this.getAtomata(str.substr(pos + 1), s_end) : s_end;
 
             // начало может быть null, если это пустая строка ('|10', left.begins === null)
             // тогда можем сразу задать ей конец s_end (это переданное конечное состояние)
-            if (left === null) left = s_end;
-            if (right === null) right = s_end;
+            // if (left === null) left = s_end;
+            // if (right === null) right = s_end;
 
             let names = left.concat(right);
 
@@ -114,7 +114,7 @@ export default class Atomate{
                         isStar = true;
                     else
                         isPlus = true;
-                    nextsAfterBrackets = this.getAtomata(str.substr(positions + 2), s_end);
+                    nextsAfterBrackets = (str.length > positions + 2) ? this.getAtomata(str.substr(positions + 2), s_end) : s_end;
                 }
                 if (isStar){
                     // это звезда
@@ -132,20 +132,42 @@ export default class Atomate{
                     });
                     // теперь ищем состояния, которые переходят в наши statesToMove
                     // дабы передвинуть их на нашу вершину
+                    console.log(statesToMove);
                     this.states.forEach((s, si) => {
                         // бежим по всем состояниям и ищем наше (stateName) среди Е дуг
-                        s['0'].findIndex(v => {
-                            return stateName.findIndex(v) != -1;
+                        let terminals = ['0', '1', 'e'];
+                        terminals.forEach(terminal => {
+                            let isStateHaveStatesToMove = s[terminal].findIndex(v => {
+                                return (statesToMove.findIndex(v2 => {
+                                    return (v2 == v);
+                                }) != -1);
+                            });
+                            if (isStateHaveStatesToMove != -1){
+                                // мы знаем что в состоянии 's'
+                                // по треминалу 'terminal'
+                                // в позиции 'isStateHaveStatesToMove'
+                                // находится кто-то из 'stateToMove'
+                                // т.е. нам надо заменить текущее состояние (на этой позиции)
+                                // на stateName
+                                this.states[si][terminal][isStateHaveStatesToMove] = stateName;
+                            }
                         });
-                        s['0'].forEach(v => {
-                            let pos = stateName.findIndex(v);
-                        });
-                        if ( != -1){
-                            // надо бы передвинуть нас на stateName, соблюдая терминал
-                            this.states[si]['0']
-                        }
                     });
+                    // после всех наших волшебных преобразований надо удалить из состояний неиспользуемые - stateToMove
+                    let newStates = [];
+                    this.states.forEach(state => {
+                        if (statesToMove.findIndex(s => s == state.name ) == -1)
+                            newStates.push(state);
+                    });
+                    this.states = newStates;
                     
+                    nextsAfterBrackets.forEach(brack => {
+                        this.stateAddNext(stateName, brack.terminal, brack.name);
+                    });
+                    names.forEach(n => {
+                        this.stateAddNext(stateName, n.terminal, n.name)
+                    });
+
 
                     return [{
                         'name': stateName,
@@ -228,6 +250,8 @@ export default class Atomate{
         let error = null;
         if (!this.areBracketsBalanced())
             return "Скобки не сбалансированы!";
+
+        console.log('____');
         
         this.states.push({
             'name': 'A',

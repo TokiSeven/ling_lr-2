@@ -39075,7 +39075,7 @@
 
 	var _reactBootstrap = __webpack_require__(159);
 
-	var _atomate = __webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module \"./atomate.js\""); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
+	var _atomate = __webpack_require__(413);
 
 	var _atomate2 = _interopRequireDefault(_atomate);
 
@@ -39241,6 +39241,319 @@
 	}(_react2.default.Component);
 
 	exports.default = Task1;
+
+/***/ },
+/* 413 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var Atomate = function () {
+	    function Atomate(str) {
+	        _classCallCheck(this, Atomate);
+
+	        this.setData(str);
+	    }
+
+	    _createClass(Atomate, [{
+	        key: 'setData',
+	        value: function setData(str) {
+	            this.data = str;
+	            this.states = [];
+	            this.statesCount = 0;
+	        }
+	    }, {
+	        key: 'findOR',
+	        value: function findOR(str) {
+	            var bracketsCount = 0;
+	            for (var i = 0; i < str.length; i++) {
+	                if (str[i] == '(') bracketsCount++;
+	                if (str[i] == ')') bracketsCount--;
+	                if (bracketsCount == 0 && str[i] == "|") return i;
+	            }
+	            return -1;
+	        }
+	    }, {
+	        key: 'areBracketsBalanced',
+	        value: function areBracketsBalanced() {
+	            var s = this.data;
+	            var count = 0;
+	            for (var i = 0; i < s.length; i++) {
+	                if (s[i] == '(') count++;
+	                if (s[i] == ')') count--;
+	                if (count < 0) return false;
+	            }
+	            return count == 0;
+	        }
+	    }, {
+	        key: 'getAvailableName',
+	        value: function getAvailableName() {
+	            return 'St_' + this.statesCount;
+	        }
+	    }, {
+	        key: 'addState',
+	        value: function addState() {
+	            var terminal_0 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+	            var terminal_1 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+	            var terminal_e = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+
+	            this.statesCount++;
+	            var name = this.getAvailableName();
+	            this.states.push({
+	                'name': name,
+	                '0': terminal_0,
+	                '1': terminal_1,
+	                'e': terminal_e
+	            });
+	            return name;
+	        }
+	    }, {
+	        key: 'removeState',
+	        value: function removeState(name) {
+	            var pos = this.findState(name);
+	            this.states.splice(pos, 1);
+	        }
+	    }, {
+	        key: 'findState',
+	        value: function findState(name) {
+	            return this.states.findIndex(function (v) {
+	                return v.name == name;
+	            });
+	        }
+	    }, {
+	        key: 'stateAddNext',
+	        value: function stateAddNext(name, terminal, next) {
+	            var pos = this.findState(name);
+	            if (pos == -1) return false;
+	            this.states[pos][terminal.toString()].push(next);
+	            return true;
+	        }
+	    }, {
+	        key: 'getAtomata',
+	        value: function getAtomata(str) {
+	            var s_end = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [{ 'name': 'Z', 'terminal': 'e' }];
+
+	            var _this = this;
+
+	            var isStar = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+	            var shouldRepeatFirst = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
+	            if (!str.length) return s_end;
+
+	            // ищем 'ИЛИ'
+	            var pos = this.findOR(str);
+
+	            if (pos != -1) {
+	                // 'ИЛИ' внутри строки
+	                // получение входных и выходных состояний левых и правых частей 'ИЛИ'
+	                var left = this.getAtomata(str.substr(0, pos), s_end);
+	                var right = pos + 1 < str.length ? this.getAtomata(str.substr(pos + 1), s_end) : s_end;
+
+	                // начало может быть null, если это пустая строка ('|10', left.begins === null)
+	                // тогда можем сразу задать ей конец s_end (это переданное конечное состояние)
+	                // if (left === null) left = s_end;
+	                // if (right === null) right = s_end;
+
+	                var names = left.concat(right);
+
+	                return names;
+	            } else {
+	                // нет явного ИЛИ (только внутри скобок, но это отдельно обрабатывается)
+	                // обработка символа (если не скобка, иначе обработка скобки рекурсивно)
+
+	                if (str[0] == '(') {
+	                    // поиск закрывающей строки
+	                    var count = 1;
+	                    var positions = -1;
+	                    for (var i = 1; i < str.length && count; i++) {
+	                        if (str[i] == '(') {
+	                            count++;
+	                        } else if (str[i] == ')') {
+	                            count--;
+	                            if (count == 0) positions = i;
+	                        }
+	                    }
+
+	                    var isPlus = false;
+	                    // обработка всего
+	                    var nextsAfterBrackets = s_end;
+	                    if (positions + 1 < str.length) // если после скобок есть что-то
+	                        nextsAfterBrackets = this.getAtomata(str.substr(positions + 1), s_end);
+	                    if (nextsAfterBrackets === true || nextsAfterBrackets === false) {
+	                        // если после скобок звезда или плюсик
+	                        // то берем то, что после плюсика или звезды
+	                        if (nextsAfterBrackets) isStar = true;else isPlus = true;
+	                        nextsAfterBrackets = str.length > positions + 2 ? this.getAtomata(str.substr(positions + 2), s_end) : s_end;
+	                    }
+	                    if (isStar) {
+	                        // это звезда
+	                        // тогда надо бы создать вершину
+	                        // запихнуть её как конец в скобки
+	                        // и сделать ответвление от неё на них
+	                        var stateName = this.addState(); // получили имя состояние (зацикливанной вершины)
+	                        var _names2 = this.getAtomata(str.substr(1, positions - 1), [{ 'name': stateName, 'terminal': 'e' }]); // зациклили на нашей созданной вершине по Е дуге
+	                        // окей, надо бы перетащить в эту дугу лишнее состояние
+	                        var statesToMove = [];
+	                        this.states.forEach(function (s) {
+	                            // бежим по всем состояниям и ищем наше (stateName) среди Е дуг
+	                            if (s['e'].findIndex(function (v) {
+	                                return v == stateName;
+	                            }) != -1) statesToMove.push(s.name);
+	                        });
+	                        // теперь ищем состояния, которые переходят в наши statesToMove
+	                        // дабы передвинуть их на нашу вершину
+	                        console.log(statesToMove);
+	                        this.states.forEach(function (s, si) {
+	                            // бежим по всем состояниям и ищем наше (stateName) среди Е дуг
+	                            var terminals = ['0', '1', 'e'];
+	                            terminals.forEach(function (terminal) {
+	                                var isStateHaveStatesToMove = s[terminal].findIndex(function (v) {
+	                                    return statesToMove.findIndex(function (v2) {
+	                                        return v2 == v;
+	                                    }) != -1;
+	                                });
+	                                if (isStateHaveStatesToMove != -1) {
+	                                    // мы знаем что в состоянии 's'
+	                                    // по треминалу 'terminal'
+	                                    // в позиции 'isStateHaveStatesToMove'
+	                                    // находится кто-то из 'stateToMove'
+	                                    // т.е. нам надо заменить текущее состояние (на этой позиции)
+	                                    // на stateName
+	                                    _this.states[si][terminal][isStateHaveStatesToMove] = stateName;
+	                                }
+	                            });
+	                        });
+	                        // после всех наших волшебных преобразований надо удалить из состояний неиспользуемые - stateToMove
+	                        var newStates = [];
+	                        this.states.forEach(function (state) {
+	                            if (statesToMove.findIndex(function (s) {
+	                                return s == state.name;
+	                            }) == -1) newStates.push(state);
+	                        });
+	                        this.states = newStates;
+
+	                        nextsAfterBrackets.forEach(function (brack) {
+	                            _this.stateAddNext(stateName, brack.terminal, brack.name);
+	                        });
+	                        _names2.forEach(function (n) {
+	                            _this.stateAddNext(stateName, n.terminal, n.name);
+	                        });
+
+	                        return [{
+	                            'name': stateName,
+	                            'terminal': 'e'
+	                        }];
+	                    }
+	                    var _names = this.getAtomata(str.substr(1, positions - 1), nextsAfterBrackets);
+	                    return _names;
+	                } else if (str[0] == '1' || str[0] == '0') {
+	                    // если это не все, что выше, то это обычный символ
+	                    var name = this.addState();
+
+	                    // если мы пришли сюда из скобок
+	                    // то надо бы зациклить себя на себе же
+	                    // if (shouldRepeatFirst) s_end = [{'name': name, 'terminal': str[0]}];
+
+	                    var nexts = s_end;
+	                    var _isPlus = false;
+	                    if (str.length >= 2) {
+	                        nexts = this.getAtomata(str.substr(1), s_end);
+	                        if (nexts === true || nexts === false) {
+	                            // если следующий элемент - звезда или плюс
+	                            // заранее узнаем что это, ибо дальше эта переменная меняется
+	                            if (nexts) isStar = true;else _isPlus = true;
+
+	                            // а тут берем рекурсию от следующего элемента
+	                            if (str.length >= 3) nexts = this.getAtomata(str.substr(2), s_end);else nexts = s_end;
+
+	                            // а тут мы добавляем возврат на наш текущий элемент
+	                            // надо же вернуться
+	                            // nexts = nexts.concat([ {'name': name, 'terminal': str[0]} ]);
+	                        }
+	                    }
+
+	                    var currentTerminal = str[0];
+
+	                    if (isStar || _isPlus) {
+	                        // если мы начали с этой строки и у нас флаг
+	                        // isStar (или isPlus) в тру, то надо в конечный элемент добавить начальный
+	                        this.stateAddNext(name, str[0], name);
+
+	                        if (isStar) currentTerminal = 'e';
+
+	                        var name2 = this.addState();
+	                        nexts.forEach(function (v) {
+	                            _this.stateAddNext(name2, v.terminal, v.name);
+	                        });
+	                        nexts = [{
+	                            'name': name2,
+	                            'terminal': 'e'
+	                        }];
+	                        s_end.push({ 'name': name, 'terminal': str[0] });
+	                    }
+
+	                    nexts.forEach(function (v) {
+	                        _this.stateAddNext(name, v.terminal, v.name);
+	                    });
+
+	                    return [{ 'name': name, 'terminal': currentTerminal }];
+	                } else if (str[0] == '*' || str[0] == '+') {
+	                    // возвращение из getAtomata true свидетельствует о знаке * (false о знаке +), иначе объект
+	                    return str[0] == '*';
+	                } else if (str[0] != ')') {
+	                    var er = "Неподдерживаемый символ: " + str[0];
+	                    throw er;
+	                }
+	            }
+	        }
+	    }, {
+	        key: 'Do',
+	        value: function Do() {
+	            var _this2 = this;
+
+	            if (!this.data) return "Пустая строка";
+	            var n = this.data.length;
+	            var error = null;
+	            if (!this.areBracketsBalanced()) return "Скобки не сбалансированы!";
+
+	            console.log('____');
+
+	            this.states.push({
+	                'name': 'A',
+	                '0': [],
+	                '1': [],
+	                'e': []
+	            });
+	            this.states.push({
+	                'name': 'Z',
+	                '0': [],
+	                '1': [],
+	                'e': []
+	            });
+	            try {
+	                var inputNames = this.getAtomata(this.data);
+	                inputNames.forEach(function (v) {
+	                    _this2.stateAddNext('A', v.terminal, v.name);
+	                });
+	            } catch (e) {
+	                error = e;
+	            }
+	            return error === null ? this.states : error;
+	        }
+	    }]);
+
+	    return Atomate;
+	}();
+
+	exports.default = Atomate;
 
 /***/ }
 /******/ ]);
