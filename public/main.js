@@ -39267,7 +39267,7 @@
 	        key: 'setData',
 	        value: function setData(str) {
 	            this.data = str;
-	            this.states = {};
+	            this.states = [];
 	            this.stars = [];
 	        }
 	    }, {
@@ -39306,49 +39306,77 @@
 	            var terminal_e = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
 
 	            var name = this.getAvailableName();
-	            this.states[name] = {
+	            this.states.push({
 	                'name': name,
 	                '0': terminal_0,
 	                '1': terminal_1,
 	                'e': terminal_e
-	            };
+	            });
 	            return name;
+	        }
+	    }, {
+	        key: 'findState',
+	        value: function findState(name) {
+	            return this.states.findIndex(function (v) {
+	                return v.name == name;
+	            });
 	        }
 	    }, {
 	        key: 'stateAddNext',
 	        value: function stateAddNext(name, terminal, next) {
-	            if (!this.states[name]) return false;
-	            this.states[name][terminal.toString()].push(next);
+	            var pos = this.findState(name);
+	            if (pos == -1) return false;
+	            this.states[pos][terminal.toString()].push(next);
 	            return true;
 	        }
+	    }, {
+	        key: 'bindAllStars',
+	        value: function bindAllStars() {
+	            var _this = this;
 
-	        // bindAllStars(){
-	        //     let states = this.states;
-	        //     this.stars.forEach(star => {
-	        //         // у нас есть объект с полями 'name' (имя состояние, которое является входом для звезды)
-	        //         // и 'ends' - массивом имен, в которые надо провести Е дуги
-	        //         this.states.forEach((state, stateNum) => {
-	        //             // state - состояние из всех возможных
-	        //             // если его выходы (nexts) идут в наше (star.name), то надо бы добавить еще одно следующее состояние
-	        //             // ведущее на выходы нашего
-	        //             let stateNexts = state.nexts;
-	        //             state.nexts.forEach(next => {
-	        //                 if (next == star.name){
-	        //                     stateNexts.concat(star.ends);
-	        //                     return false;
-	        //                 }
-	        //             });
-	        //             states[stateNum].nexts = stateNexts;
-	        //         });
-	        //     });
-	        //     this.states = states;
-	        // }
-
+	            var states = this.states;
+	            this.stars.forEach(function (star) {
+	                // у нас есть объект с полями 'name' (имя состояние, которое является входом для звезды)
+	                // и 'nexts' - массивом имен, в которые надо провести Е дуги
+	                _this.states.forEach(function (state, stateNum) {
+	                    // state - текущее выбранное состояние из всех возможных
+	                    // если его выходы (nexts) идут в наше (star.name), то надо бы добавить еще одно следующее состояние
+	                    // ведущее на выходы нашего
+	                    if (state['0'].findIndex(function (v) {
+	                        return v == star.name;
+	                    }) != -1) {
+	                        // если нашли элемент, который идет в нашу звезду
+	                        star.nexts.forEach(function (n) {
+	                            _this.stateAddNext(state.name, 'e', n.name);
+	                        });
+	                    }
+	                    if (state['1'].findIndex(function (v) {
+	                        return v == star.name;
+	                    }) != -1) {
+	                        // если нашли элемент, который идет в нашу звезду
+	                        star.nexts.forEach(function (n) {
+	                            _this.stateAddNext(state.name, 'e', n.name);
+	                        });
+	                    }
+	                    if (state['e'].findIndex(function (v) {
+	                        return v == star.name;
+	                    }) != -1) {
+	                        // если нашли элемент, который идет в нашу звезду
+	                        star.nexts.forEach(function (n) {
+	                            _this.stateAddNext(state.name, 'e', n.name);
+	                        });
+	                    }
+	                });
+	            });
+	            this.states = states;
+	        }
 	    }, {
 	        key: 'getAtomata',
 	        value: function getAtomata(str) {
-	            var s_end = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : ['R'];
-	            var isStar = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+	            var _this2 = this;
+
+	            var s_end = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [{ 'name': 'Z', 'terminal': 'e' }];
+	            var isStar = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
 
 	            if (!str.length) return s_end;
 
@@ -39358,8 +39386,8 @@
 	            if (pos != -1) {
 	                // 'ИЛИ' внутри строки
 	                // получение входных и выходных состояний левых и правых частей 'ИЛИ'
-	                var left = this.getAtomata(str.substr(0, pos), s_end, isStar);
-	                var right = this.getAtomata(str.substr(pos + 1), s_end, isStar);
+	                var left = this.getAtomata(str.substr(0, pos), s_end);
+	                var right = this.getAtomata(str.substr(pos + 1), s_end);
 
 	                // начало может быть null, если это пустая строка ('|10', left.begins === null)
 	                // тогда можем сразу задать ей конец s_end (это переданное конечное состояние)
@@ -39388,62 +39416,71 @@
 
 	                    // обработка всего
 	                    var nextsAfterBrackets = s_end;
-	                    var _names = [];
 	                    if (positions + 1 < str.length) // если после скобок есть что-то
 	                        nextsAfterBrackets = this.getAtomata(str.substr(positions + 1), s_end);
 	                    if (nextsAfterBrackets === true || nextsAfterBrackets === false) {
 	                        // если после скобок звезда или плюсик
 	                        // то берем то, что после плюсика или звезды
 	                        nextsAfterBrackets = this.getAtomata(str.substr(positions + 2), s_end);
-	                        _names = this.getAtomata(str.substr(1, positions - 1), nextsAfterBrackets, 1);
-	                    } else {
-	                        _names = this.getAtomata(str.substr(1, positions - 1), nextsAfterBrackets);
+	                        isStar = true;
 	                    }
+	                    var _names = this.getAtomata(str.substr(1, positions - 1), nextsAfterBrackets);
 	                    return _names;
 	                } else if (str[0] == '1' || str[0] == '0') {
 	                    // если это не все, что выше, то это обычный символ
 	                    var name = this.addState();
-	                    if (_isStar) {
-	                        // если мы начали с этой строки и у нас флаг
-	                        // isStar в тру, то надо в конечный элемент добавить начальный
-	                        // заодно надо бы добавить в особый массив stars текущие вхождения и выходы
-	                        // чтобы потом спокойно перебиндить все состояния, которые входят в это
-	                        // на Е дугу к концу
-	                        this.stars.push({
-	                            'name': name,
-	                            'ends': s_end
-	                        });
-	                        s_end.push(name);
-	                        _isStar = false;
-	                    }
 	                    var nexts = s_end;
-	                    var _isStar = false;
 	                    var isPlus = false;
 	                    if (str.length >= 2) {
 	                        nexts = this.getAtomata(str.substr(1), s_end);
 	                        if (nexts === true || nexts === false) {
 	                            // если следующий элемент - звезда или плюс
 	                            // заранее узнаем что это, ибо дальше эта переменная меняется
-	                            if (nexts) _isStar = true;else isPlus = true;
+	                            if (nexts) isStar = true;else isPlus = true;
 
 	                            // а тут берем рекурсию от следующего элемента
 	                            if (str.length >= 3) nexts = this.getAtomata(str.substr(2), s_end);else nexts = s_end;
 
 	                            // а тут мы добавляем возврат на наш текущий элемент
 	                            // надо же вернуться
-	                            nexts = nexts.concat(name);
-	                        }
-	                        if (_isStar) {
-	                            // this.addInfoToState(name, {'is'});
+	                            // nexts = nexts.concat([ {'name': name, 'terminal': str[0]} ]);
 	                        }
 	                    }
 
-	                    // после всех действий надо бы обновить следующие элементы в хранилище
-	                    this.stateAddNext(name, str[0], next);
-	                    // this.updateState(name, nexts);
-	                    return [name];
+	                    var currentTerminal = str[0];
+
+	                    if (isStar || isPlus) {
+	                        // если мы начали с этой строки и у нас флаг
+	                        // isStar (или isPlus) в тру, то надо в конечный элемент добавить начальный
+	                        // так же надо бы добавить в особый массив stars текущие вхождения и выходы
+	                        // чтобы потом спокойно перебиндить все состояния, которые входят в это
+	                        // на Е дугу к концу
+	                        this.stars.push({
+	                            'name': name,
+	                            'nexts': nexts
+	                        });
+	                        this.stateAddNext(name, str[0], name);
+
+	                        if (isStar) currentTerminal = 'e';
+
+	                        var name2 = this.addState();
+	                        nexts.forEach(function (v) {
+	                            _this2.stateAddNext(name2, v.terminal, v.name);
+	                        });
+	                        nexts = [{
+	                            'name': name2,
+	                            'terminal': 'e'
+	                        }];
+	                        s_end.push({ 'name': name, 'terminal': str[0] });
+	                    }
+
+	                    nexts.forEach(function (v) {
+	                        _this2.stateAddNext(name, v.terminal, v.name);
+	                    });
+
+	                    return [{ 'name': name, 'terminal': currentTerminal }];
 	                } else if (str[0] == '*' || str[0] == '+') {
-	                    // ввозвращение из getAtomata true свидетельствует о знаке * (false о знаке +), иначе объект
+	                    // возвращение из getAtomata true свидетельствует о знаке * (false о знаке +), иначе объект
 	                    return str[0] == '*';
 	                } else if (str[0] != ')') {
 	                    var er = "Неподдерживаемый символ: " + str[0];
@@ -39454,30 +39491,32 @@
 	    }, {
 	        key: 'Do',
 	        value: function Do() {
+	            var _this3 = this;
+
 	            if (!this.data) return "Пустая строка";
 	            var n = this.data.length;
 	            var error = null;
 	            if (!this.areBracketsBalanced()) return "Скобки не сбалансированы!";
 
-	            this.states['S'] = {
+	            this.states.push({
+	                'name': 'A',
 	                '0': [],
 	                '1': [],
 	                'e': []
-	            };
-	            this.states.push({
-	                'name': 'S',
-	                'terminal': null,
-	                'nexts': []
 	            });
 	            this.states.push({
-	                'name': 'R',
-	                'terminal': 'e',
-	                'nexts': []
+	                'name': 'Z',
+	                '0': [],
+	                '1': [],
+	                'e': []
 	            });
 	            try {
-	                var inputNames = this.getAtomata(this.data, ['R']);
-	                this.updateState('S', inputNames);
-	                this.bindAllStars();
+	                var inputNames = this.getAtomata(this.data);
+	                inputNames.forEach(function (v) {
+	                    _this3.stateAddNext('A', v.terminal, v.name);
+	                });
+	                // console.log(this.stars);
+	                // this.bindAllStars();
 	            } catch (e) {
 	                error = e;
 	            }
