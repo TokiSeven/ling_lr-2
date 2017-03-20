@@ -39393,12 +39393,13 @@
 	                        if (nextsAfterBrackets) isStar = true;else isPlus = true;
 	                        nextsAfterBrackets = str.length > positions + 2 ? this.getAtomata(str.substr(positions + 2), s_end) : s_end;
 	                    }
-	                    if (isStar) {
-	                        // это звезда
+	                    if (isPlus || isStar) {
+	                        // это плюс или звезда
 	                        // тогда надо бы создать вершину
 	                        // запихнуть её как конец в скобки
-	                        // и сделать ответвление от неё на них
-	                        var stateName = this.addState(); // получили имя состояние (зацикливанной вершины)
+	                        // сделать ответвление от неё на их начало
+	                        // продолжить по Е символу к тому, что после скобок идет
+	                        var stateName = this.addState();
 	                        var _names2 = this.getAtomata(str.substr(1, positions - 1), [{ 'name': stateName, 'terminal': 'e' }]); // зациклили на нашей созданной вершине по Е дуге
 	                        // окей, надо бы перетащить в эту дугу лишнее состояние
 	                        var statesToMove = [];
@@ -39410,7 +39411,6 @@
 	                        });
 	                        // теперь ищем состояния, которые переходят в наши statesToMove
 	                        // дабы передвинуть их на нашу вершину
-	                        console.log(statesToMove);
 	                        this.states.forEach(function (s, si) {
 	                            // бежим по всем состояниям и ищем наше (stateName) среди Е дуг
 	                            var terminals = ['0', '1', 'e'];
@@ -39447,11 +39447,12 @@
 	                            _this.stateAddNext(stateName, n.terminal, n.name);
 	                        });
 
-	                        return [{
+	                        if (isPlus) return _names2;else return [{
 	                            'name': stateName,
 	                            'terminal': 'e'
 	                        }];
 	                    }
+
 	                    var _names = this.getAtomata(str.substr(1, positions - 1), nextsAfterBrackets);
 	                    return _names;
 	                } else if (str[0] == '1' || str[0] == '0') {
@@ -39523,8 +39524,6 @@
 	            var n = this.data.length;
 	            var error = null;
 	            if (!this.areBracketsBalanced()) return "Скобки не сбалансированы!";
-
-	            console.log('____');
 
 	            this.states.push({
 	                'name': 'A',

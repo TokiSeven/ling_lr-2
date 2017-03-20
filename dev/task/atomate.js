@@ -116,12 +116,13 @@ export default class Atomate{
                         isPlus = true;
                     nextsAfterBrackets = (str.length > positions + 2) ? this.getAtomata(str.substr(positions + 2), s_end) : s_end;
                 }
-                if (isStar){
-                    // это звезда
+                if (isPlus || isStar){
+                    // это плюс или звезда
                     // тогда надо бы создать вершину
                     // запихнуть её как конец в скобки
-                    // и сделать ответвление от неё на них
-                    let stateName = this.addState(); // получили имя состояние (зацикливанной вершины)
+                    // сделать ответвление от неё на их начало
+                    // продолжить по Е символу к тому, что после скобок идет
+                    let stateName = this.addState();
                     let names = this.getAtomata(str.substr(1, positions - 1), [{'name': stateName, 'terminal': 'e'}]); // зациклили на нашей созданной вершине по Е дуге
                     // окей, надо бы перетащить в эту дугу лишнее состояние
                     let statesToMove = [];
@@ -132,7 +133,6 @@ export default class Atomate{
                     });
                     // теперь ищем состояния, которые переходят в наши statesToMove
                     // дабы передвинуть их на нашу вершину
-                    console.log(statesToMove);
                     this.states.forEach((s, si) => {
                         // бежим по всем состояниям и ищем наше (stateName) среди Е дуг
                         let terminals = ['0', '1', 'e'];
@@ -168,12 +168,15 @@ export default class Atomate{
                         this.stateAddNext(stateName, n.terminal, n.name)
                     });
 
-
-                    return [{
-                        'name': stateName,
-                        'terminal': 'e'
-                    }];
+                    if (isPlus)
+                        return names;
+                    else
+                        return [{
+                            'name': stateName,
+                            'terminal': 'e'
+                        }];
                 }
+                
                 let names = this.getAtomata(str.substr(1, positions - 1), nextsAfterBrackets);
                 return names;
             }else if (str[0] == '1' || str[0] == '0'){
@@ -250,8 +253,6 @@ export default class Atomate{
         let error = null;
         if (!this.areBracketsBalanced())
             return "Скобки не сбалансированы!";
-
-        console.log('____');
         
         this.states.push({
             'name': 'A',
