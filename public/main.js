@@ -39330,50 +39330,9 @@
 	            return true;
 	        }
 	    }, {
-	        key: 'bindAllStars',
-	        value: function bindAllStars() {
-	            var _this = this;
-
-	            var states = this.states;
-	            this.stars.forEach(function (star) {
-	                // у нас есть объект с полями 'name' (имя состояние, которое является входом для звезды)
-	                // и 'nexts' - массивом имен, в которые надо провести Е дуги
-	                _this.states.forEach(function (state, stateNum) {
-	                    // state - текущее выбранное состояние из всех возможных
-	                    // если его выходы (nexts) идут в наше (star.name), то надо бы добавить еще одно следующее состояние
-	                    // ведущее на выходы нашего
-	                    if (state['0'].findIndex(function (v) {
-	                        return v == star.name;
-	                    }) != -1) {
-	                        // если нашли элемент, который идет в нашу звезду
-	                        star.nexts.forEach(function (n) {
-	                            _this.stateAddNext(state.name, 'e', n.name);
-	                        });
-	                    }
-	                    if (state['1'].findIndex(function (v) {
-	                        return v == star.name;
-	                    }) != -1) {
-	                        // если нашли элемент, который идет в нашу звезду
-	                        star.nexts.forEach(function (n) {
-	                            _this.stateAddNext(state.name, 'e', n.name);
-	                        });
-	                    }
-	                    if (state['e'].findIndex(function (v) {
-	                        return v == star.name;
-	                    }) != -1) {
-	                        // если нашли элемент, который идет в нашу звезду
-	                        star.nexts.forEach(function (n) {
-	                            _this.stateAddNext(state.name, 'e', n.name);
-	                        });
-	                    }
-	                });
-	            });
-	            this.states = states;
-	        }
-	    }, {
 	        key: 'getAtomata',
 	        value: function getAtomata(str) {
-	            var _this2 = this;
+	            var _this = this;
 
 	            var s_end = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [{ 'name': 'Z', 'terminal': 'e' }];
 	            var isStar = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
@@ -39465,7 +39424,7 @@
 
 	                        var name2 = this.addState();
 	                        nexts.forEach(function (v) {
-	                            _this2.stateAddNext(name2, v.terminal, v.name);
+	                            _this.stateAddNext(name2, v.terminal, v.name);
 	                        });
 	                        nexts = [{
 	                            'name': name2,
@@ -39475,7 +39434,7 @@
 	                    }
 
 	                    nexts.forEach(function (v) {
-	                        _this2.stateAddNext(name, v.terminal, v.name);
+	                        _this.stateAddNext(name, v.terminal, v.name);
 	                    });
 
 	                    return [{ 'name': name, 'terminal': currentTerminal }];
@@ -39491,7 +39450,7 @@
 	    }, {
 	        key: 'Do',
 	        value: function Do() {
-	            var _this3 = this;
+	            var _this2 = this;
 
 	            if (!this.data) return "Пустая строка";
 	            var n = this.data.length;
@@ -39513,10 +39472,8 @@
 	            try {
 	                var inputNames = this.getAtomata(this.data);
 	                inputNames.forEach(function (v) {
-	                    _this3.stateAddNext('A', v.terminal, v.name);
+	                    _this2.stateAddNext('A', v.terminal, v.name);
 	                });
-	                // console.log(this.stars);
-	                // this.bindAllStars();
 	            } catch (e) {
 	                error = e;
 	            }

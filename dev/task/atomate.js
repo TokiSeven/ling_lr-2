@@ -59,38 +59,6 @@ export default class Atomate{
         return true;
     }
 
-    bindAllStars(){
-        let states = this.states;
-        this.stars.forEach(star => {
-            // у нас есть объект с полями 'name' (имя состояние, которое является входом для звезды)
-            // и 'nexts' - массивом имен, в которые надо провести Е дуги
-            this.states.forEach((state, stateNum) => {
-                // state - текущее выбранное состояние из всех возможных
-                // если его выходы (nexts) идут в наше (star.name), то надо бы добавить еще одно следующее состояние
-                // ведущее на выходы нашего
-                if (state['0'].findIndex(v => {return v == star.name;}) != -1){
-                    // если нашли элемент, который идет в нашу звезду
-                    star.nexts.forEach(n => {
-                        this.stateAddNext(state.name, 'e', n.name);
-                    });
-                }
-                if (state['1'].findIndex(v => {return v == star.name;}) != -1){
-                    // если нашли элемент, который идет в нашу звезду
-                    star.nexts.forEach(n => {
-                        this.stateAddNext(state.name, 'e', n.name);
-                    });
-                }
-                if (state['e'].findIndex(v => {return v == star.name;}) != -1){
-                    // если нашли элемент, который идет в нашу звезду
-                    star.nexts.forEach(n => {
-                        this.stateAddNext(state.name, 'e', n.name);
-                    });
-                }
-            });
-        });
-        this.states = states;
-    }
-
     getAtomata(str, s_end = [{'name': 'Z', 'terminal': 'e'}], isStar = false){
         if (!str.length) return s_end;
 
@@ -234,8 +202,6 @@ export default class Atomate{
             inputNames.forEach(v => {
                 this.stateAddNext('A', v.terminal, v.name);
             });
-            // console.log(this.stars);
-            // this.bindAllStars();
         }catch(e){
             error = e;
         }
