@@ -6,7 +6,7 @@ export default class Atomate{
     setData(str){
         this.data = str;
         this.states = [];
-        this.stars = [];
+        this.statesCount = 0;
     }
 
     findOR(str){
@@ -32,10 +32,11 @@ export default class Atomate{
     }
 
     getAvailableName(){
-        return 'St_' + this.states.length;
+        return 'St_' + this.statesCount;
     }
 
     addState(terminal_0 = [], terminal_1 = [], terminal_e = []){
+        this.statesCount++;
         let name = this.getAvailableName();
         this.states.push({
             'name': name,
@@ -44,6 +45,11 @@ export default class Atomate{
             'e': terminal_e
         });
         return name;
+    }
+
+    removeState(name){
+        let pos = this.findState(name);
+        this.states.splice(pos, 1);
     }
 
     findState(name){
@@ -59,7 +65,7 @@ export default class Atomate{
         return true;
     }
 
-    getAtomata(str, s_end = [{'name': 'Z', 'terminal': 'e'}], isStar = false){
+    getAtomata(str, s_end = [{'name': 'Z', 'terminal': 'e'}], isStar = false, shouldRepeatFirst = false){
         if (!str.length) return s_end;
 
         // ищем 'ИЛИ'
@@ -96,6 +102,7 @@ export default class Atomate{
                     }
                 }
 
+                let isPlus = false;
                 // обработка всего
                 let nextsAfterBrackets = s_end;
                 if (positions + 1 < str.length) // если после скобок есть что-то
@@ -103,14 +110,58 @@ export default class Atomate{
                 if (nextsAfterBrackets === true || nextsAfterBrackets === false){
                     // если после скобок звезда или плюсик
                     // то берем то, что после плюсика или звезды
+                    if (nextsAfterBrackets)
+                        isStar = true;
+                    else
+                        isPlus = true;
                     nextsAfterBrackets = this.getAtomata(str.substr(positions + 2), s_end);
-                    isStar = true;
+                }
+                if (isStar){
+                    // это звезда
+                    // тогда надо бы создать вершину
+                    // запихнуть её как конец в скобки
+                    // и сделать ответвление от неё на них
+                    let stateName = this.addState(); // получили имя состояние (зацикливанной вершины)
+                    let names = this.getAtomata(str.substr(1, positions - 1), [{'name': stateName, 'terminal': 'e'}]); // зациклили на нашей созданной вершине по Е дуге
+                    // окей, надо бы перетащить в эту дугу лишнее состояние
+                    let statesToMove = [];
+                    this.states.forEach(s => {
+                        // бежим по всем состояниям и ищем наше (stateName) среди Е дуг
+                        if (s['e'].findIndex(v => {return v == stateName;}) != -1)
+                            statesToMove.push(s.name);
+                    });
+                    // теперь ищем состояния, которые переходят в наши statesToMove
+                    // дабы передвинуть их на нашу вершину
+                    this.states.forEach((s, si) => {
+                        // бежим по всем состояниям и ищем наше (stateName) среди Е дуг
+                        s['0'].findIndex(v => {
+                            return stateName.findIndex(v) != -1;
+                        });
+                        s['0'].forEach(v => {
+                            let pos = stateName.findIndex(v);
+                        });
+                        if ( != -1){
+                            // надо бы передвинуть нас на stateName, соблюдая терминал
+                            this.states[si]['0']
+                        }
+                    });
+                    
+
+                    return [{
+                        'name': stateName,
+                        'terminal': 'e'
+                    }];
                 }
                 let names = this.getAtomata(str.substr(1, positions - 1), nextsAfterBrackets);
                 return names;
             }else if (str[0] == '1' || str[0] == '0'){
                 // если это не все, что выше, то это обычный символ
                 let name = this.addState();
+
+                // если мы пришли сюда из скобок
+                // то надо бы зациклить себя на себе же
+                // if (shouldRepeatFirst) s_end = [{'name': name, 'terminal': str[0]}];
+
                 let nexts = s_end;
                 let isPlus = false;
                 if (str.length >= 2){
@@ -140,13 +191,6 @@ export default class Atomate{
                 if (isStar || isPlus){
                     // если мы начали с этой строки и у нас флаг
                     // isStar (или isPlus) в тру, то надо в конечный элемент добавить начальный
-                    // так же надо бы добавить в особый массив stars текущие вхождения и выходы
-                    // чтобы потом спокойно перебиндить все состояния, которые входят в это
-                    // на Е дугу к концу
-                    this.stars.push({
-                        'name': name,
-                        'nexts': nexts
-                    });
                     this.stateAddNext(name, str[0], name);
                     
                     if (isStar) currentTerminal = 'e';
