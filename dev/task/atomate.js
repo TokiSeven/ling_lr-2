@@ -324,6 +324,7 @@ export default class Atomate{
 
     removeEquivalents(){
         // объединяем одинаковые вершины
+        let repeat = false;
         this.states.forEach((state, stateNum) => {
             if (state.name != 'A'){
                 this.states.forEach((state2, stateNum2) => {
@@ -332,14 +333,13 @@ export default class Atomate{
                             // окей, мы нашли что-то похожее, может быть они даже эквивалентны?
                             let isEquivalent = true;
 
-                            let count_0 = state['0'].length;
-                            for(let i = 0; i < count_0; i++)
-                                if (state['0'][i] != state['0'][i])
-                                    isEquivalent = false;
-                            let count_1 = state['1'].length;
-                            for(let i = 0; i < count_1; i++)
-                                if (state['1'][i] != state['1'][i])
-                                    isEquivalent = false;
+                            let terminals = ['0', '1'];
+                            terminals.forEach(t => {
+                                let count = state[t].length;
+                                for(let i = 0; i < count; i++)
+                                    if (state[t][i] != state2[t][i])
+                                        isEquivalent = false;
+                            });
                             
                             if (isEquivalent){
                                 // так они эквивалентны!
@@ -353,6 +353,7 @@ export default class Atomate{
                                                     this.states[stateNum3][terminal][stateReplaceNum] = state.name;
                                             });
                                         });
+                                        repeat = true;
                                     }
                                 });
                             }
@@ -363,6 +364,8 @@ export default class Atomate{
         });
         // после объединений можем почистить всё, что могло остаться
         this.removeHangings();
+        if (repeat)
+            this.removeEquivalents();
     }
 
     concatAndReplaceStates(stateNum, terminal){
@@ -460,7 +463,6 @@ export default class Atomate{
             this.removeHangings();
             this.groupByName();
             this.removeEquivalents();
-            this.removeHangings();
         }
 
         // объединяем одинаковые переходы

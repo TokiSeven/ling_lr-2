@@ -39639,6 +39639,7 @@
 	            var _this4 = this;
 
 	            // объединяем одинаковые вершины
+	            var repeat = false;
 	            this.states.forEach(function (state, stateNum) {
 	                if (state.name != 'A') {
 	                    _this4.states.forEach(function (state2, stateNum2) {
@@ -39647,23 +39648,26 @@
 	                                // окей, мы нашли что-то похожее, может быть они даже эквивалентны?
 	                                var isEquivalent = true;
 
-	                                var count_0 = state['0'].length;
-	                                for (var i = 0; i < count_0; i++) {
-	                                    if (state['0'][i] != state['0'][i]) isEquivalent = false;
-	                                }var count_1 = state['1'].length;
-	                                for (var _i = 0; _i < count_1; _i++) {
-	                                    if (state['1'][_i] != state['1'][_i]) isEquivalent = false;
-	                                }if (isEquivalent) {
+	                                var terminals = ['0', '1'];
+	                                terminals.forEach(function (t) {
+	                                    var count = state[t].length;
+	                                    for (var i = 0; i < count; i++) {
+	                                        if (state[t][i] != state2[t][i]) isEquivalent = false;
+	                                    }
+	                                });
+
+	                                if (isEquivalent) {
 	                                    // так они эквивалентны!
 	                                    // давайте заменим всё, что ссылается на state2.name на state.name
 	                                    _this4.states.forEach(function (state3, stateNum3) {
 	                                        if (stateNum3 != stateNum) {
-	                                            var terminals = ['0', '1'];
-	                                            terminals.forEach(function (terminal) {
+	                                            var _terminals = ['0', '1'];
+	                                            _terminals.forEach(function (terminal) {
 	                                                state3[terminal].forEach(function (stateReplace, stateReplaceNum) {
 	                                                    if (stateReplace == state2.name) _this4.states[stateNum3][terminal][stateReplaceNum] = state.name;
 	                                                });
 	                                            });
+	                                            repeat = true;
 	                                        }
 	                                    });
 	                                }
@@ -39674,6 +39678,7 @@
 	            });
 	            // после объединений можем почистить всё, что могло остаться
 	            this.removeHangings();
+	            if (repeat) this.removeEquivalents();
 	        }
 	    }, {
 	        key: 'concatAndReplaceStates',
@@ -39774,7 +39779,6 @@
 	                this.removeHangings();
 	                this.groupByName();
 	                this.removeEquivalents();
-	                this.removeHangings();
 	            }
 
 	            // объединяем одинаковые переходы
