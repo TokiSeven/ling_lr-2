@@ -39098,9 +39098,10 @@
 	        _this.state = {
 	            data: ""
 	        };
-	        _this.Atomate = new _atomate2.default("");
+	        _this.Atomate1 = new _atomate2.default("");
+	        _this.Atomate2 = new _atomate2.default("");
+	        _this.Atomate3 = new _atomate2.default("");
 	        _this.handlerChangedInput = _this.handlerChangedInput.bind(_this);
-	        _this.convertResult = _this.convertResult.bind(_this);
 	        return _this;
 	    }
 
@@ -39112,104 +39113,128 @@
 	            });
 	        }
 	    }, {
-	        key: 'isStateWithTerminal',
-	        value: function isStateWithTerminal(name, terminal, data) {
-	            var r = false;
-	            data.forEach(function (v) {
-	                if (v.name == name && v.terminal == terminal) {
-	                    r = true;
-	                    return false;
-	                }
-	            });
-	            return r;
-	        }
-	    }, {
-	        key: 'convertResult',
-	        value: function convertResult(data) {
-	            var _this2 = this;
-
-	            var converted = [];
-	            data.forEach(function (v) {
-	                var _d = {
-	                    'name': v.name,
-	                    '0': [],
-	                    '1': [],
-	                    'e': []
-	                };
-	                v.nexts.forEach(function (next) {
-	                    if (_this2.isStateWithTerminal(next, '0', data)) _d['0'].push(next);
-	                    if (_this2.isStateWithTerminal(next, '1', data)) _d['1'].push(next);
-	                    if (_this2.isStateWithTerminal(next, 'e', data)) _d['e'].push(next);
-	                });
-	                converted.push(_d);
-	            });
-	            return converted;
-	        }
-	    }, {
 	        key: 'render',
 	        value: function render() {
-	            this.Atomate.setData(this.state.data);
-	            var result = this.Atomate.Do();
+	            this.Atomate1.setData(this.state.data);
+	            this.Atomate2.setData(this.state.data);
+	            this.Atomate3.setData(this.state.data);
+
+	            var result = this.Atomate1.Do();
 	            var style = Array.isArray(result) ? "success" : "danger";
 	            if (Array.isArray(result)) {
-	                // result = this.convertResult(result).map(v => {
-	                result = result.map(function (v) {
-	                    return _react2.default.createElement(
-	                        'tr',
-	                        { className: 'text-left' },
+	                result = [result];
+	                this.Atomate2.Do();
+	                this.Atomate3.Do();
+
+	                this.Atomate2.goToNFA_without_E();
+	                this.Atomate3.goToNFA_without_E();
+
+	                this.Atomate3.goToDFA();
+
+	                result.push(this.Atomate2.getData());
+	                result.push(this.Atomate3.getData());
+
+	                var data = [];
+	                for (var i = 0; i < 3; i++) {
+	                    data[i] = result[i].map(function (v) {
+	                        var isEnd = v.isEnd ? "1" : "";
+	                        return _react2.default.createElement(
+	                            'tr',
+	                            { className: 'text-left' },
+	                            _react2.default.createElement(
+	                                'td',
+	                                null,
+	                                v.name
+	                            ),
+	                            _react2.default.createElement(
+	                                'td',
+	                                null,
+	                                v['0'].join(", ")
+	                            ),
+	                            _react2.default.createElement(
+	                                'td',
+	                                null,
+	                                v['1'].join(", ")
+	                            ),
+	                            _react2.default.createElement(
+	                                'td',
+	                                null,
+	                                v['e'].join(", ")
+	                            ),
+	                            _react2.default.createElement(
+	                                'td',
+	                                null,
+	                                isEnd
+	                            )
+	                        );
+	                    });
+	                    data[i] = _react2.default.createElement(
+	                        'table',
+	                        { className: 'table table-hover table-condensed' },
 	                        _react2.default.createElement(
-	                            'td',
+	                            'thead',
 	                            null,
-	                            v.name
+	                            _react2.default.createElement(
+	                                'th',
+	                                null,
+	                                '\u0421\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u044F'
+	                            ),
+	                            _react2.default.createElement(
+	                                'th',
+	                                null,
+	                                '0'
+	                            ),
+	                            _react2.default.createElement(
+	                                'th',
+	                                null,
+	                                '1'
+	                            ),
+	                            _react2.default.createElement(
+	                                'th',
+	                                null,
+	                                'e'
+	                            ),
+	                            _react2.default.createElement('th', null)
 	                        ),
 	                        _react2.default.createElement(
-	                            'td',
+	                            'tbody',
 	                            null,
-	                            v['0'].join(", ")
-	                        ),
-	                        _react2.default.createElement(
-	                            'td',
-	                            null,
-	                            v['1'].join(", ")
-	                        ),
-	                        _react2.default.createElement(
-	                            'td',
-	                            null,
-	                            v['e'].join(", ")
+	                            data[i]
 	                        )
 	                    );
-	                });
+	                }
 	                result = _react2.default.createElement(
-	                    'table',
-	                    { className: 'table table-hover table-condensed' },
+	                    _reactBootstrap.Row,
+	                    null,
 	                    _react2.default.createElement(
-	                        'thead',
-	                        null,
+	                        _reactBootstrap.Col,
+	                        { xs: 12, sm: 6 },
 	                        _react2.default.createElement(
-	                            'th',
+	                            'h4',
 	                            null,
-	                            '\u0421\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u044F'
+	                            '\u041D\u041A\u0410 \u0441 \u0415 - \u0434\u0443\u0433\u0430\u043C\u0438'
 	                        ),
-	                        _react2.default.createElement(
-	                            'th',
-	                            null,
-	                            '0'
-	                        ),
-	                        _react2.default.createElement(
-	                            'th',
-	                            null,
-	                            '1'
-	                        ),
-	                        _react2.default.createElement(
-	                            'th',
-	                            null,
-	                            'e'
-	                        )
+	                        data[0]
 	                    ),
 	                    _react2.default.createElement(
-	                        'tbody',
-	                        null,
-	                        result
+	                        _reactBootstrap.Col,
+	                        { xs: 12, sm: 6 },
+	                        _react2.default.createElement(
+	                            'h4',
+	                            null,
+	                            '\u041D\u041A\u0410 \u0431\u0435\u0437 \u0415 - \u0434\u0443\u0433'
+	                        ),
+	                        data[1]
+	                    ),
+	                    _react2.default.createElement(
+	                        _reactBootstrap.Col,
+	                        { xs: 12, sm: 6, smOffset: 3 },
+	                        _react2.default.createElement(
+	                            'h4',
+	                            null,
+	                            '\u0414\u041A\u0410'
+	                        ),
+	                        data[2]
 	                    )
 	                );
 	            } else {
@@ -39229,8 +39254,12 @@
 	                _react2.default.createElement(
 	                    _reactBootstrap.Col,
 	                    { xs: 12, sm: 6, smOffset: 3 },
-	                    _react2.default.createElement('input', { type: 'text', onChange: this.handlerChangedInput, className: 'form-control' }),
-	                    _react2.default.createElement('br', null),
+	                    _react2.default.createElement('input', { type: 'text', onChange: this.handlerChangedInput, className: 'form-control' })
+	                ),
+	                _react2.default.createElement('br', null),
+	                _react2.default.createElement(
+	                    _reactBootstrap.Col,
+	                    { xs: 12, sm: 12 },
 	                    result
 	                )
 	            );
@@ -39269,6 +39298,23 @@
 	            this.data = str;
 	            this.states = [];
 	            this.statesCount = 0;
+	        }
+	    }, {
+	        key: 'getData',
+	        value: function getData() {
+	            var array = [];
+	            if (this.states.length > 0) {
+	                this.states.forEach(function (v) {
+	                    array.push({
+	                        'name': v.name,
+	                        '0': v['0'].slice(),
+	                        '1': v['1'].slice(),
+	                        'e': v['e'].slice(),
+	                        'isEnd': v.isEnd
+	                    });
+	                });
+	            }
+	            return array;
 	        }
 	    }, {
 	        key: 'findOR',
@@ -39311,7 +39357,8 @@
 	                'name': name,
 	                '0': terminal_0,
 	                '1': terminal_1,
-	                'e': terminal_e
+	                'e': terminal_e,
+	                'isEnd': false
 	            });
 	            return name;
 	        }
@@ -39516,9 +39563,58 @@
 	            }
 	        }
 	    }, {
+	        key: 'goToNFA_without_E',
+	        value: function goToNFA_without_E() {
+	            var _this2 = this;
+
+	            if (this.states.length > 0) {
+	                var been = true;
+	                while (been) {
+	                    been = false;
+	                    var stateNum = 0;
+
+	                    var _loop = function _loop() {
+	                        been = false;
+	                        var state = _this2.states[stateNum];
+	                        state['e'].forEach(function (eState) {
+	                            // eState - текущий элемент по Е символу
+	                            var eStateNum = _this2.findState(eState);
+	                            if (eStateNum != -1) {
+	                                state['e'].push(_this2.states[eStateNum]['e']);
+	                            }
+	                        });
+	                        state['e'].forEach(function (eState) {
+	                            // eState - текущий элемент по Е символу
+	                            var eStateNum = _this2.findState(eState);
+	                            if (eStateNum != -1) {
+	                                // надо скопировать все состояния из eState в state
+	                                state['0'] = state['0'].concat(_this2.states[eStateNum]['0']);
+	                                state['1'] = state['1'].concat(_this2.states[eStateNum]['1']);
+	                                if (_this2.states[eStateNum].isEnd) state.isEnd = true;
+	                                been = true;
+	                            }
+	                        });
+	                        state['e'] = [];
+	                        _this2.states[stateNum] = state;
+	                        stateNum++;
+	                    };
+
+	                    while (this.states.length > stateNum) {
+	                        _loop();
+	                    }
+	                }
+	            }
+	            return this.states.slice();
+	        }
+	    }, {
+	        key: 'goToDFA',
+	        value: function goToDFA() {
+	            return this.states.slice();
+	        }
+	    }, {
 	        key: 'Do',
 	        value: function Do() {
-	            var _this2 = this;
+	            var _this3 = this;
 
 	            if (!this.data) return "Пустая строка";
 	            var n = this.data.length;
@@ -39529,23 +39625,28 @@
 	                'name': 'A',
 	                '0': [],
 	                '1': [],
-	                'e': []
+	                'e': [],
+	                'isEnd': false
 	            });
 	            this.states.push({
 	                'name': 'Z',
 	                '0': [],
 	                '1': [],
-	                'e': []
+	                'e': [],
+	                'isEnd': true
 	            });
 	            try {
 	                var inputNames = this.getAtomata(this.data);
 	                inputNames.forEach(function (v) {
-	                    _this2.stateAddNext('A', v.terminal, v.name);
+	                    _this3.stateAddNext('A', v.terminal, v.name);
 	                });
 	            } catch (e) {
 	                error = e;
 	            }
-	            return error === null ? this.states : error;
+
+	            if (error !== null) return error;
+
+	            return this.states.slice();
 	        }
 	    }]);
 

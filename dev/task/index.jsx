@@ -8,9 +8,10 @@ export default class Task1 extends React.Component{
         this.state = {
             data: ""
         };
-        this.Atomate = new Atomate("");
+        this.Atomate1 = new Atomate("");
+        this.Atomate2 = new Atomate("");
+        this.Atomate3 = new Atomate("");
         this.handlerChangedInput = this.handlerChangedInput.bind(this);
-        this.convertResult = this.convertResult.bind(this);
     }
 
     handlerChangedInput(e){
@@ -19,64 +20,70 @@ export default class Task1 extends React.Component{
         });
     }
 
-    isStateWithTerminal(name, terminal, data){
-        let r = false;
-        data.forEach(v => {
-            if (v.name == name && v.terminal == terminal){
-                r = true;
-                return false;
-            }
-        });
-        return r;
-    }
-
-    convertResult(data){
-        let converted = [];
-        data.forEach(v => {
-            let _d = {
-                'name': v.name,
-                '0': [],
-                '1': [],
-                'e': []
-            };
-            v.nexts.forEach(next => {
-                if (this.isStateWithTerminal(next, '0', data)) _d['0'].push(next);
-                if (this.isStateWithTerminal(next, '1', data)) _d['1'].push(next);
-                if (this.isStateWithTerminal(next, 'e', data)) _d['e'].push(next);
-            });
-            converted.push(_d);
-        });
-        return converted;
-    }
-
     render(){
-        this.Atomate.setData(this.state.data);
-        let result = this.Atomate.Do();
+        this.Atomate1.setData(this.state.data);
+        this.Atomate2.setData(this.state.data);
+        this.Atomate3.setData(this.state.data);
+
+        let result = this.Atomate1.Do();
         let style = Array.isArray(result) ? "success" : "danger";
         if (Array.isArray(result)){
-            // result = this.convertResult(result).map(v => {
-            result = result.map(v => {
-                return (
-                    <tr className = 'text-left'>
-                        <td>{v.name}</td>
-                        <td>{v['0'].join(", ")}</td>
-                        <td>{v['1'].join(", ")}</td>
-                        <td>{v['e'].join(", ")}</td>
-                    </tr>
+            result = [result];
+            this.Atomate2.Do();
+            this.Atomate3.Do();
+
+            this.Atomate2.goToNFA_without_E();
+            this.Atomate3.goToNFA_without_E();
+
+            this.Atomate3.goToDFA();
+
+            result.push(this.Atomate2.getData());
+            result.push(this.Atomate3.getData());
+            
+            let data = [];
+            for(let i = 0; i < 3; i++){
+                data[i] = result[i].map(v => {
+                    let isEnd = v.isEnd ? "1" : "";
+                    return (
+                        <tr className = 'text-left'>
+                            <td>{v.name}</td>
+                            <td>{v['0'].join(", ")}</td>
+                            <td>{v['1'].join(", ")}</td>
+                            <td>{v['e'].join(", ")}</td>
+                            <td>{isEnd}</td>
+                        </tr>
+                    );
+                });
+                data[i] = (
+                    <table className = 'table table-hover table-condensed'>
+                        <thead>
+                            <th>Состояния</th>
+                            <th>0</th>
+                            <th>1</th>
+                            <th>e</th>
+                            <th></th>
+                        </thead>
+                        <tbody>
+                            {data[i]}
+                        </tbody>
+                    </table>
                 );
-            });
+            }
             result = (
-                <table className = 'table table-hover table-condensed'>
-                    <thead>
-                        <th>Состояния</th>
-                        <th>0</th>
-                        <th>1</th>
-                        <th>e</th>
-                    </thead>
-                    <tbody>
-                        {result}
-                    </tbody>
-                </table>
+                <Row>
+                    <Col xs = {12} sm = {6}>
+                        <h4>НКА с Е - дугами</h4>
+                        {data[0]}
+                    </Col>
+                    <Col xs = {12} sm = {6}>
+                        <h4>НКА без Е - дуг</h4>
+                        {data[1]}
+                    </Col>
+                    <Col xs = {12} sm = {6} smOffset = {3}>
+                        <h4>ДКА</h4>
+                        {data[2]}
+                    </Col>
+                </Row>
             );
         }else{
             result = (
@@ -91,7 +98,9 @@ export default class Task1 extends React.Component{
             <Row>
                 <Col xs = {12} sm = {6} smOffset = {3}>
                     <input type = "text" onChange = {this.handlerChangedInput} className = "form-control" />
-                    <br />
+                </Col>
+                <br />
+                <Col xs = {12} sm = {12}>
                     {result}
                 </Col>
             </Row>

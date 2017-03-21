@@ -9,6 +9,22 @@ export default class Atomate{
         this.statesCount = 0;
     }
 
+    getData(){
+        let array = [];
+        if (this.states.length > 0){
+            this.states.forEach(v => {
+                array.push({
+                    'name': v.name,
+                    '0': v['0'].slice(),
+                    '1': v['1'].slice(),
+                    'e': v['e'].slice(),
+                    'isEnd': v.isEnd
+                });
+            });
+        }
+        return array;
+    }
+
     findOR(str){
         let bracketsCount = 0;
         for (let i = 0; i < str.length; i++){
@@ -42,7 +58,8 @@ export default class Atomate{
             'name': name,
             '0': terminal_0,
             '1': terminal_1,
-            'e': terminal_e
+            'e': terminal_e,
+            'isEnd': false
         });
         return name;
     }
@@ -246,6 +263,46 @@ export default class Atomate{
         }
     }
 
+    goToNFA_without_E(){
+        if (this.states.length > 0){
+            let been = true;
+            while(been){
+                been = false;
+                let stateNum = 0;
+                while(this.states.length > stateNum){
+                    been = false;
+                    let state = this.states[stateNum];
+                    state['e'].forEach(eState => {
+                        // eState - текущий элемент по Е символу
+                        let eStateNum = this.findState(eState);
+                        if (eStateNum != -1){
+                            state['e'].push(this.states[eStateNum]['e']);
+                        }
+                    });
+                    state['e'].forEach(eState => {
+                        // eState - текущий элемент по Е символу
+                        let eStateNum = this.findState(eState);
+                        if (eStateNum != -1){
+                            // надо скопировать все состояния из eState в state
+                            state['0'] = state['0'].concat(this.states[eStateNum]['0']);
+                            state['1'] = state['1'].concat(this.states[eStateNum]['1']);
+                            if (this.states[eStateNum].isEnd) state.isEnd = true;
+                            been = true;
+                        }
+                    });
+                    state['e'] = [];
+                    this.states[stateNum] = state;
+                    stateNum++;
+                }
+            }
+        }
+        return this.states.slice();
+    }
+
+    goToDFA(){
+        return this.states.slice();
+    }
+
     Do(){
         if (!this.data)
             return "Пустая строка";
@@ -258,13 +315,15 @@ export default class Atomate{
             'name': 'A',
             '0': [],
             '1': [],
-            'e': []
+            'e': [],
+            'isEnd': false
         });
         this.states.push({
             'name': 'Z',
             '0': [],
             '1': [],
-            'e': []
+            'e': [],
+            'isEnd': true
         });
         try{
             let inputNames = this.getAtomata(this.data);
@@ -274,6 +333,10 @@ export default class Atomate{
         }catch(e){
             error = e;
         }
-        return error === null ? this.states : error;
+
+        if (error !== null)
+            return error;
+        
+        return this.states.slice();
     }
 }
