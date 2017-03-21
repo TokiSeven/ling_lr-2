@@ -141,6 +141,12 @@ export default class Atomate{
                     // продолжить по Е символу к тому, что после скобок идет
                     let stateName = this.addState();
                     let names = this.getAtomata(str.substr(1, positions - 1), [{'name': stateName, 'terminal': 'e'}]); // зациклили на нашей созданной вершине по Е дуге
+                    nextsAfterBrackets.forEach(brack => {
+                        this.stateAddNext(stateName, brack.terminal, brack.name);
+                    });
+                    names.forEach(n => {
+                        this.stateAddNext(stateName, n.terminal, n.name)
+                    });
                     // окей, надо бы перетащить в эту дугу лишнее состояние
                     let statesToMove = [];
                     this.states.forEach(s => {
@@ -177,13 +183,6 @@ export default class Atomate{
                             newStates.push(state);
                     });
                     this.states = newStates;
-                    
-                    nextsAfterBrackets.forEach(brack => {
-                        this.stateAddNext(stateName, brack.terminal, brack.name);
-                    });
-                    names.forEach(n => {
-                        this.stateAddNext(stateName, n.terminal, n.name)
-                    });
 
                     if (isPlus)
                         return names;
@@ -286,20 +285,185 @@ export default class Atomate{
                             // надо скопировать все состояния из eState в state
                             state['0'] = state['0'].concat(this.states[eStateNum]['0']);
                             state['1'] = state['1'].concat(this.states[eStateNum]['1']);
+                            state['e'] = [].concat(this.states[eStateNum]['e']);
                             if (this.states[eStateNum].isEnd) state.isEnd = true;
                             been = true;
                         }
                     });
                     state['e'] = [];
                     this.states[stateNum] = state;
-                    stateNum++;
+                    if (!been)
+                        stateNum++;
+                    else
+                        stateNum = 0;
                 }
             }
         }
         return this.states.slice();
     }
 
+    removeHangings(){
+        // удаляем висячие вершины
+        let newStates = [];
+        newStates.push(this.states[0]); // добавление A
+        this.states.forEach((state, stateNum) => {
+            if (state.name != 'A'){
+                let been = false;
+                this.states.forEach((state2, stateNum2) => {
+                    if (stateNum2 != stateNum && !been){
+                        // разные состояния
+                        if (state2['0'].findIndex(v => v == state.name) != -1) been = true;
+                        if (state2['1'].findIndex(v => v == state.name) != -1) been = true;
+                        if (been) newStates.push(state);
+                    }
+                });
+            }
+        });
+        this.states = newStates;
+    }
+
+    removeEquivalents(){
+        // объединяем одинаковые вершины
+        this.states.forEach((state, stateNum) => {
+            if (state.name != 'A'){
+                this.states.forEach((state2, stateNum2) => {
+                    if (stateNum2 != stateNum && state2.name != 'A'){
+                        if (state['0'].length == state2['0'].length && state['1'].length == state2['1'].length && state.isEnd == state2.isEnd){
+                            // окей, мы нашли что-то похожее, может быть они даже эквивалентны?
+                            let isEquivalent = true;
+
+                            let count_0 = state['0'].length;
+                            for(let i = 0; i < count_0; i++)
+                                if (state['0'][i] != state['0'][i])
+                                    isEquivalent = false;
+                            let count_1 = state['1'].length;
+                            for(let i = 0; i < count_1; i++)
+                                if (state['1'][i] != state['1'][i])
+                                    isEquivalent = false;
+                            
+                            if (isEquivalent){
+                                // так они эквивалентны!
+                                // давайте заменим всё, что ссылается на state2.name на state.name
+                                this.states.forEach((state3, stateNum3) => {
+                                    if (stateNum3 != stateNum){
+                                        let terminals = ['0', '1'];
+                                        terminals.forEach(terminal => {
+                                            state3[terminal].forEach((stateReplace, stateReplaceNum) => {
+                                                if (stateReplace == state2.name)
+                                                    this.states[stateNum3][terminal][stateReplaceNum] = state.name;
+                                            });
+                                        });
+                                    }
+                                });
+                            }
+                        }
+                    }
+                });
+            }
+        });
+        // после объединений можем почистить всё, что могло остаться
+        this.removeHangings();
+    }
+
+    concatAndReplaceStates(stateNum, terminal){
+        let n = this.states.length;
+        let namesToReplace = [].concat(this.states[stateNum][terminal]);
+        let nexts_by_0 = [];
+        let nexts_by_1 = [];
+        let isEnd = this.states[stateNum].isEnd;
+        let newName = this.states[stateNum][terminal].join("");
+        if (this.findState(newName) != -1) return;
+
+        namesToReplace.forEach(stateName => {
+            // получаю данные из своих имен
+            let pos = this.findState(stateName);
+            if (pos != -1){
+                let names_0 = [];
+                this.states[pos]['0'].forEach(curr => {
+                    if (namesToReplace.findIndex(v => curr == v) == -1)
+                        names_0.push(curr);
+                });
+                nexts_by_0 = names_0;
+                let names_1 = [];
+                this.states[pos]['1'].forEach(curr => {
+                    if (namesToReplace.findIndex(v => curr == v) == -1)
+                        names_1.push(curr);
+                });
+                nexts_by_1 = names_1;
+                if (this.states[pos].isEnd) isEnd = true;
+            }
+
+            // заменяю все наши имена (если найду) на новое
+            this.states.forEach((state, i) => {
+                let terminals = ['0', '1'];
+                terminals.forEach(t => {
+                    let been = false;
+                    let newNames = [];
+                    state[t].forEach(v => {
+                        if (stateName != v){
+                            newNames.push(v);
+                        }else{
+                            been = true;
+                        }
+                    });
+                    if (been)
+                        newNames.push(newName);
+                    this.states[i][t] = [].concat(newNames);
+                });
+            });
+        });
+
+        this.states.push({
+            'name': newName,
+            '0': nexts_by_0,
+            '1': nexts_by_1,
+            'e': [],
+            'isEnd': isEnd
+        });
+
+        let newState = [];
+        this.states.forEach(state => {
+            if (namesToReplace.findIndex(v => v == state.name) == -1)
+                newState.push(state);
+        });
+        this.states = newState;
+
+    }
+
+    groupByName(){
+        // пора бы сгруппировать по именам
+        let shouldRepeat = true;
+        let stateNum = 0;
+        let stop = 0;
+        while(stateNum < this.states.length){
+            shouldRepeat = false;
+            if (this.states[stateNum]['0'].length > 1){
+                shouldRepeat = true;
+                this.concatAndReplaceStates(stateNum, '0');
+            }else if (this.states[stateNum]['1'].length > 1){
+                shouldRepeat = true;
+                this.concatAndReplaceStates(stateNum, '1');
+            }
+
+            if (shouldRepeat)
+                stateNum = 0;
+            else
+                stateNum++;
+            stop++;
+        }
+        // после объединений можем почистить всё, что могло остаться
+        this.removeHangings();
+    }
+
     goToDFA(){
+        if (this.states.length > 1){
+            this.removeHangings();
+            this.groupByName();
+            this.removeEquivalents();
+            this.removeHangings();
+        }
+
+        // объединяем одинаковые переходы
         return this.states.slice();
     }
 

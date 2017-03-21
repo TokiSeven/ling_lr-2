@@ -39448,6 +39448,12 @@
 	                        // продолжить по Е символу к тому, что после скобок идет
 	                        var stateName = this.addState();
 	                        var _names2 = this.getAtomata(str.substr(1, positions - 1), [{ 'name': stateName, 'terminal': 'e' }]); // зациклили на нашей созданной вершине по Е дуге
+	                        nextsAfterBrackets.forEach(function (brack) {
+	                            _this.stateAddNext(stateName, brack.terminal, brack.name);
+	                        });
+	                        _names2.forEach(function (n) {
+	                            _this.stateAddNext(stateName, n.terminal, n.name);
+	                        });
 	                        // окей, надо бы перетащить в эту дугу лишнее состояние
 	                        var statesToMove = [];
 	                        this.states.forEach(function (s) {
@@ -39486,13 +39492,6 @@
 	                            }) == -1) newStates.push(state);
 	                        });
 	                        this.states = newStates;
-
-	                        nextsAfterBrackets.forEach(function (brack) {
-	                            _this.stateAddNext(stateName, brack.terminal, brack.name);
-	                        });
-	                        _names2.forEach(function (n) {
-	                            _this.stateAddNext(stateName, n.terminal, n.name);
-	                        });
 
 	                        if (isPlus) return _names2;else return [{
 	                            'name': stateName,
@@ -39590,13 +39589,14 @@
 	                                // надо скопировать все состояния из eState в state
 	                                state['0'] = state['0'].concat(_this2.states[eStateNum]['0']);
 	                                state['1'] = state['1'].concat(_this2.states[eStateNum]['1']);
+	                                state['e'] = [].concat(_this2.states[eStateNum]['e']);
 	                                if (_this2.states[eStateNum].isEnd) state.isEnd = true;
 	                                been = true;
 	                            }
 	                        });
 	                        state['e'] = [];
 	                        _this2.states[stateNum] = state;
-	                        stateNum++;
+	                        if (!been) stateNum++;else stateNum = 0;
 	                    };
 
 	                    while (this.states.length > stateNum) {
@@ -39607,14 +39607,183 @@
 	            return this.states.slice();
 	        }
 	    }, {
+	        key: 'removeHangings',
+	        value: function removeHangings() {
+	            var _this3 = this;
+
+	            // удаляем висячие вершины
+	            var newStates = [];
+	            newStates.push(this.states[0]); // добавление A
+	            this.states.forEach(function (state, stateNum) {
+	                if (state.name != 'A') {
+	                    var been = false;
+	                    _this3.states.forEach(function (state2, stateNum2) {
+	                        if (stateNum2 != stateNum && !been) {
+	                            // разные состояния
+	                            if (state2['0'].findIndex(function (v) {
+	                                return v == state.name;
+	                            }) != -1) been = true;
+	                            if (state2['1'].findIndex(function (v) {
+	                                return v == state.name;
+	                            }) != -1) been = true;
+	                            if (been) newStates.push(state);
+	                        }
+	                    });
+	                }
+	            });
+	            this.states = newStates;
+	        }
+	    }, {
+	        key: 'removeEquivalents',
+	        value: function removeEquivalents() {
+	            var _this4 = this;
+
+	            // объединяем одинаковые вершины
+	            this.states.forEach(function (state, stateNum) {
+	                if (state.name != 'A') {
+	                    _this4.states.forEach(function (state2, stateNum2) {
+	                        if (stateNum2 != stateNum && state2.name != 'A') {
+	                            if (state['0'].length == state2['0'].length && state['1'].length == state2['1'].length && state.isEnd == state2.isEnd) {
+	                                // окей, мы нашли что-то похожее, может быть они даже эквивалентны?
+	                                var isEquivalent = true;
+
+	                                var count_0 = state['0'].length;
+	                                for (var i = 0; i < count_0; i++) {
+	                                    if (state['0'][i] != state['0'][i]) isEquivalent = false;
+	                                }var count_1 = state['1'].length;
+	                                for (var _i = 0; _i < count_1; _i++) {
+	                                    if (state['1'][_i] != state['1'][_i]) isEquivalent = false;
+	                                }if (isEquivalent) {
+	                                    // так они эквивалентны!
+	                                    // давайте заменим всё, что ссылается на state2.name на state.name
+	                                    _this4.states.forEach(function (state3, stateNum3) {
+	                                        if (stateNum3 != stateNum) {
+	                                            var terminals = ['0', '1'];
+	                                            terminals.forEach(function (terminal) {
+	                                                state3[terminal].forEach(function (stateReplace, stateReplaceNum) {
+	                                                    if (stateReplace == state2.name) _this4.states[stateNum3][terminal][stateReplaceNum] = state.name;
+	                                                });
+	                                            });
+	                                        }
+	                                    });
+	                                }
+	                            }
+	                        }
+	                    });
+	                }
+	            });
+	            // после объединений можем почистить всё, что могло остаться
+	            this.removeHangings();
+	        }
+	    }, {
+	        key: 'concatAndReplaceStates',
+	        value: function concatAndReplaceStates(stateNum, terminal) {
+	            var _this5 = this;
+
+	            var n = this.states.length;
+	            var namesToReplace = [].concat(this.states[stateNum][terminal]);
+	            var nexts_by_0 = [];
+	            var nexts_by_1 = [];
+	            var isEnd = this.states[stateNum].isEnd;
+	            var newName = this.states[stateNum][terminal].join("");
+	            if (this.findState(newName) != -1) return;
+
+	            namesToReplace.forEach(function (stateName) {
+	                // получаю данные из своих имен
+	                var pos = _this5.findState(stateName);
+	                if (pos != -1) {
+	                    var names_0 = [];
+	                    _this5.states[pos]['0'].forEach(function (curr) {
+	                        if (namesToReplace.findIndex(function (v) {
+	                            return curr == v;
+	                        }) == -1) names_0.push(curr);
+	                    });
+	                    nexts_by_0 = names_0;
+	                    var names_1 = [];
+	                    _this5.states[pos]['1'].forEach(function (curr) {
+	                        if (namesToReplace.findIndex(function (v) {
+	                            return curr == v;
+	                        }) == -1) names_1.push(curr);
+	                    });
+	                    nexts_by_1 = names_1;
+	                    if (_this5.states[pos].isEnd) isEnd = true;
+	                }
+
+	                // заменяю все наши имена (если найду) на новое
+	                _this5.states.forEach(function (state, i) {
+	                    var terminals = ['0', '1'];
+	                    terminals.forEach(function (t) {
+	                        var been = false;
+	                        var newNames = [];
+	                        state[t].forEach(function (v) {
+	                            if (stateName != v) {
+	                                newNames.push(v);
+	                            } else {
+	                                been = true;
+	                            }
+	                        });
+	                        if (been) newNames.push(newName);
+	                        _this5.states[i][t] = [].concat(newNames);
+	                    });
+	                });
+	            });
+
+	            this.states.push({
+	                'name': newName,
+	                '0': nexts_by_0,
+	                '1': nexts_by_1,
+	                'e': [],
+	                'isEnd': isEnd
+	            });
+
+	            var newState = [];
+	            this.states.forEach(function (state) {
+	                if (namesToReplace.findIndex(function (v) {
+	                    return v == state.name;
+	                }) == -1) newState.push(state);
+	            });
+	            this.states = newState;
+	        }
+	    }, {
+	        key: 'groupByName',
+	        value: function groupByName() {
+	            // пора бы сгруппировать по именам
+	            var shouldRepeat = true;
+	            var stateNum = 0;
+	            var stop = 0;
+	            while (stateNum < this.states.length) {
+	                shouldRepeat = false;
+	                if (this.states[stateNum]['0'].length > 1) {
+	                    shouldRepeat = true;
+	                    this.concatAndReplaceStates(stateNum, '0');
+	                } else if (this.states[stateNum]['1'].length > 1) {
+	                    shouldRepeat = true;
+	                    this.concatAndReplaceStates(stateNum, '1');
+	                }
+
+	                if (shouldRepeat) stateNum = 0;else stateNum++;
+	                stop++;
+	            }
+	            // после объединений можем почистить всё, что могло остаться
+	            this.removeHangings();
+	        }
+	    }, {
 	        key: 'goToDFA',
 	        value: function goToDFA() {
+	            if (this.states.length > 1) {
+	                this.removeHangings();
+	                this.groupByName();
+	                this.removeEquivalents();
+	                this.removeHangings();
+	            }
+
+	            // объединяем одинаковые переходы
 	            return this.states.slice();
 	        }
 	    }, {
 	        key: 'Do',
 	        value: function Do() {
-	            var _this3 = this;
+	            var _this6 = this;
 
 	            if (!this.data) return "Пустая строка";
 	            var n = this.data.length;
@@ -39638,7 +39807,7 @@
 	            try {
 	                var inputNames = this.getAtomata(this.data);
 	                inputNames.forEach(function (v) {
-	                    _this3.stateAddNext('A', v.terminal, v.name);
+	                    _this6.stateAddNext('A', v.terminal, v.name);
 	                });
 	            } catch (e) {
 	                error = e;
